@@ -15,6 +15,7 @@ function schema_sql(string $driver): array
     $sql[] = "CREATE TABLE IF NOT EXISTS login_attempts (id $id, ip $str NOT NULL, created_at INT NOT NULL)$tail";
     $sql[] = "CREATE TABLE IF NOT EXISTS ships (id $id, sort_order INT NOT NULL DEFAULT 0, active TINYINT NOT NULL DEFAULT 1, tag $str, name $str NOT NULL, depart $str, return_time $str, extra $str, price $str, featured TINYINT NOT NULL DEFAULT 0)$tail";
     $sql[] = "CREATE TABLE IF NOT EXISTS packages (id $id, sort_order INT NOT NULL DEFAULT 0, active TINYINT NOT NULL DEFAULT 1, icon $str, name $str NOT NULL, summary $str, features TEXT, badge $str, hot TINYINT NOT NULL DEFAULT 0)$tail";
+    $sql[] = "CREATE TABLE IF NOT EXISTS hotels (id $id, sort_order INT NOT NULL DEFAULT 0, active TINYINT NOT NULL DEFAULT 1, image $str NOT NULL DEFAULT '', name $str NOT NULL, location $str NOT NULL DEFAULT '', stars INT NOT NULL DEFAULT 3, rating $str NOT NULL DEFAULT '', price $str NOT NULL DEFAULT '', summary TEXT, amenities TEXT, badge $str NOT NULL DEFAULT '', featured TINYINT NOT NULL DEFAULT 0)$tail";
     $sql[] = "CREATE TABLE IF NOT EXISTS whys (id $id, sort_order INT NOT NULL DEFAULT 0, active TINYINT NOT NULL DEFAULT 1, icon $str, title $str NOT NULL, body TEXT)$tail";
     $sql[] = "CREATE TABLE IF NOT EXISTS steps (id $id, sort_order INT NOT NULL DEFAULT 0, active TINYINT NOT NULL DEFAULT 1, title $str NOT NULL, body TEXT)$tail";
     $sql[] = "CREATE TABLE IF NOT EXISTS faqs (id $id, sort_order INT NOT NULL DEFAULT 0, active TINYINT NOT NULL DEFAULT 1, question $str NOT NULL, answer TEXT)$tail";
@@ -22,7 +23,7 @@ function schema_sql(string $driver): array
     return $sql;
 }
 
-// Admin CRUD definitions. type: text | textarea | check | number
+// Admin CRUD definitions. type: text | textarea | check | number | image
 function crud_defs(): array
 {
     return [
@@ -36,6 +37,21 @@ function crud_defs(): array
                 'extra' => ['অতিরিক্ত সুবিধা (ইমোজি সহ)', 'text'],
                 'price' => ['ভাড়া (যেমন ১,২০০)', 'text'],
                 'featured' => ['হাইলাইট কার্ড', 'check'],
+            ],
+        ],
+        'hotels' => [
+            'title' => 'হোটেল লিস্টিং', 'label' => 'name',
+            'fields' => [
+                'image' => ['হোটেলের ছবি (PNG/JPG/WebP, ২MB পর্যন্ত)', 'image'],
+                'name' => ['হোটেলের নাম', 'text', true],
+                'location' => ['এলাকা/লোকেশন (যেমন: সেন্ট মার্টিন, জেটি ঘাট)', 'text'],
+                'stars' => ['স্টার (১-৫)', 'number'],
+                'rating' => ['রেটিং (যেমন: ৪.৫/৫)', 'text'],
+                'price' => ['প্রতি রাতের ভাড়া (যেমন: ২,৫০০)', 'text'],
+                'summary' => ['সংক্ষিপ্ত বিবরণ', 'textarea'],
+                'amenities' => ['সুবিধাসমূহ (প্রতি লাইনে একটি)', 'textarea'],
+                'badge' => ['ব্যাজ (যেমন: সী-ভিউ)', 'text'],
+                'featured' => ['হোমপেজে দেখান', 'check'],
             ],
         ],
         'packages' => [

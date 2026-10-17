@@ -22,6 +22,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         exit;
     }
     if ($act === 'delete' && $id) {
+        foreach ($def['fields'] as $col => $f) {
+            if ($f[1] === 'image') {
+                $o = $pdo->prepare("SELECT $col FROM $t WHERE id = ?");
+                $o->execute([$id]);
+                if ($old = $o->fetchColumn()) {
+                    delete_upload($old);
+                }
+            }
+        }
         $pdo->prepare("DELETE FROM $t WHERE id = ?")->execute([$id]);
         flash('মুছে ফেলা হয়েছে।');
     } elseif ($act === 'toggle' && $id) {
@@ -40,9 +49,36 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     } elseif ($act === 'save') {
         $vals = [];
         $bad = false;
+        $oldRow = [];
+        if ($id) {
+            $o = $pdo->prepare("SELECT * FROM $t WHERE id = ?");
+            $o->execute([$id]);
+            $oldRow = $o->fetch() ?: [];
+        }
         foreach ($def['fields'] as $col => $f) {
             if ($f[1] === 'check') {
                 $vals[$col] = empty($_POST[$col]) ? 0 : 1;
+            } elseif ($f[1] === 'number') {
+                $vals[$col] = max(1, min(5, (int)($_POST[$col] ?? 3)));
+            } elseif ($f[1] === 'image') {
+                $cur = (string)($oldRow[$col] ?? '');
+                try {
+                    $new = save_image_upload($_FILES[$col] ?? ['error' => UPLOAD_ERR_NO_FILE]);
+                } catch (RuntimeException $ex) {
+                    flash($ex->getMessage(), 'err');
+                    header('Location: ' . $self . ($id ? "&edit=$id" : '&edit=new'));
+                    exit;
+                }
+                if ($new) {
+                    if ($cur) {
+                        delete_upload($cur);
+                    }
+                    $cur = $new;
+                } elseif (!empty($_POST['remove_' . $col]) && $cur) {
+                    delete_upload($cur);
+                    $cur = '';
+                }
+                $vals[$col] = $cur;
             } else {
                 $vals[$col] = mb_substr(trim((string)($_POST[$col] ?? '')), 0, $f[1] === 'textarea' ? 2000 : 255);
                 if (!empty($f[2]) && $vals[$col] === '') {
@@ -81,11 +117,18 @@ if (isset($_GET['edit'])) {
         $row = $st->fetch() ?: [];
     }
     ?>
-<form method="post" class="form">
+<form method="post" class="form" enctype="multipart/form-data">
   <?= csrf_field() ?><input type="hidden" name="act" value="save"><input type="hidden" name="id" value="<?= $id ?>">
   <?php foreach ($def['fields'] as $col => $f): $val = $row[$col] ?? ''; ?>
     <?php if ($f[1] === 'check'): ?>
       <label class="chk"><input type="checkbox" name="<?= e($col) ?>" value="1" <?= $val ? 'checked' : '' ?>> <?= e($f[0]) ?></label>
+    <?php elseif ($f[1] === 'image'): ?>
+      <label><?= e($f[0]) ?>
+        <?php if ($val): ?><span class="preview"><img src="../<?= e($val) ?>" alt=""> <span class="chk"><input type="checkbox" name="remove_<?= e($col) ?>" value="1"> মুছে ফেলুন</span></span><?php endif; ?>
+        <input type="file" name="<?= e($col) ?>" accept="image/*">
+      </label>
+    <?php elseif ($f[1] === 'number'): ?>
+      <label><?= e($f[0]) ?><input type="number" min="1" max="5" name="<?= e($col) ?>" value="<?= e($val !== '' ? $val : 3) ?>"></label>
     <?php elseif ($f[1] === 'textarea'): ?>
       <label><?= e($f[0]) ?><textarea name="<?= e($col) ?>" rows="4"><?= e($val) ?></textarea></label>
     <?php else: ?>

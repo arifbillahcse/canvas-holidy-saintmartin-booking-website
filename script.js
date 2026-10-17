@@ -181,3 +181,27 @@
   var yr = $('#year');
   if (yr) yr.textContent = bn(new Date().getFullYear());
 })();
+
+/* ===== Hotels page filter ===== */
+(function () {
+  var grid = document.getElementById('hotelGrid');
+  if (!grid) return;
+  var q = document.getElementById('hSearch'), st = document.getElementById('hStars'), loc = document.getElementById('hLoc');
+  var empty = document.getElementById('hEmpty');
+  var cards = Array.prototype.slice.call(grid.querySelectorAll('.hotel'));
+  function apply() {
+    var term = q.value.trim().toLowerCase();
+    var minStars = parseInt(st.value, 10) || 0;
+    var where = loc ? loc.value : '';
+    var shown = 0;
+    cards.forEach(function (c) {
+      var ok = (!term || c.getAttribute('data-name').indexOf(term) > -1) &&
+        parseInt(c.getAttribute('data-stars'), 10) >= minStars &&
+        (!where || c.getAttribute('data-loc') === where);
+      c.hidden = !ok;
+      if (ok) shown++;
+    });
+    empty.hidden = shown > 0;
+  }
+  [q, st, loc].forEach(function (el) { if (el) el.addEventListener('input', apply); });
+})();

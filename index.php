@@ -1,5 +1,5 @@
 <?php
-require __DIR__ . '/includes/helpers.php';
+require __DIR__ . '/includes/site.php';
 session_boot(); // start before output so the booking form can carry a CSRF token
 $tel = '+' . phone_intl(setting('phone'));
 $telText = setting('phone');
@@ -10,43 +10,12 @@ $packages = db()->query('SELECT * FROM packages WHERE active = 1 ORDER BY sort_o
 $whys = db()->query('SELECT * FROM whys WHERE active = 1 ORDER BY sort_order, id')->fetchAll();
 $steps = db()->query('SELECT * FROM steps WHERE active = 1 ORDER BY sort_order, id')->fetchAll();
 $faqs = db()->query('SELECT * FROM faqs WHERE active = 1 ORDER BY sort_order, id')->fetchAll();
-$typed = array_values(array_filter(array_map('trim', preg_split('/\R/u', setting('typed_words')))));
-$lines = function ($t) { return array_values(array_filter(array_map('trim', preg_split('/\R/u', (string)$t)))); };
-$brand = setting('site_name_a') . ' ' . setting('site_name_b');
+$hotels = db()->query('SELECT * FROM hotels WHERE active = 1 AND featured = 1 ORDER BY sort_order, id LIMIT 3')->fetchAll();
+$typed = lines_of(setting('typed_words'));
+$lines = 'lines_of';
+$brand = brand_name();
 ?>
-<!DOCTYPE html>
-<html lang="bn">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title><?= e(setting('meta_title')) ?></title>
-<meta name="description" content="<?= e(setting('meta_description')) ?>">
-<?php if (setting('favicon')): ?><link rel="icon" href="<?= e(setting('favicon')) ?>"><?php endif; ?>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css">
-</head>
-<body>
-
-<!-- 1. HEADER -->
-<header class="header" id="top">
-  <div class="container header__inner">
-    <a href="#top" class="logo">
-      <?php if (setting('logo')): ?><img class="logo__img" src="<?= e(setting('logo')) ?>" alt="<?= e($brand) ?>"><?php else: ?><?= e(setting('site_name_a')) ?> <span><?= e(setting('site_name_b')) ?></span><?php endif; ?>
-    </a>
-    <button class="menu-toggle" aria-label="মেনু" aria-expanded="false"><span></span><span></span><span></span></button>
-    <nav class="nav" id="nav">
-      <a href="#hero">হোম</a>
-      <a href="#why">কেন আমরা</a>
-      <a href="#ships">সীপ ও টিকেট</a>
-      <a href="#packages">প্যাকেজ</a>
-      <a href="#faq">জিজ্ঞাসা</a>
-      <a href="#contact">যোগাযোগ</a>
-    </nav>
-    <a href="tel:<?= e($tel) ?>" class="btn btn--call">📞 কল করুন</a>
-  </div>
-</header>
+<?php page_open(setting('meta_title'), setting('meta_description'), true); ?>
 
 <main>
 
@@ -140,6 +109,22 @@ $brand = setting('site_name_a') . ' ' . setting('site_name_b');
     <?php if (setting('ships_note') !== ''): ?><p class="note"><?= e(setting('ships_note')) ?></p><?php endif; ?>
   </div>
 </section>
+
+<!-- 5b. HOTELS -->
+<?php if ($hotels): ?>
+<section class="section section--sand" id="hotels">
+  <div class="container">
+    <div class="section__head">
+      <h2><?= e(setting('hotels_title', 'থাকার হোটেল ও রিসোর্ট')) ?></h2>
+      <p><?= e(setting('hotels_sub', 'সেন্ট মার্টিনে আপনার বাজেট অনুযায়ী সেরা হোটেল বেছে নিন।')) ?></p>
+    </div>
+    <div class="grid grid--3">
+      <?php foreach ($hotels as $h) { hotel_card($h); } ?>
+    </div>
+    <p class="more"><a href="hotels.php" class="btn btn--primary">সব হোটেল দেখুন →</a></p>
+  </div>
+</section>
+<?php endif; ?>
 
 <!-- 6. PACKAGES -->
 <section class="section" id="packages">
@@ -241,16 +226,4 @@ $brand = setting('site_name_a') . ' ' . setting('site_name_b');
 
 </main>
 
-<footer class="footer">
-  <div class="container footer__inner">
-    <p>© <span id="year"><?= bn_digits(date('Y')) ?></span> <?= e(setting('footer_text')) ?></p>
-    <p><?= e(setting('footer_tagline')) ?></p>
-  </div>
-</footer>
-
-<!-- Floating WhatsApp -->
-<a href="<?= e($waLink) ?>" class="wa-float" aria-label="WhatsApp-এ মেসেজ করুন" target="_blank" rel="noopener">💬</a>
-
-<script src="script.js"></script>
-</body>
-</html>
+<?php page_close(); ?>
