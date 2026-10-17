@@ -68,6 +68,24 @@ function wa_number(): string
     return phone_intl($w !== '' ? $w : setting('phone'));
 }
 
+/* ---------- Client IP ---------- */
+// Behind Cloudflare, REMOTE_ADDR is Cloudflare's IP, so every visitor would share one
+// login-lockout/flood counter. Set 'trust_cloudflare' => true in config.php to use
+// CF-Connecting-IP (only enable if the site is reachable solely through Cloudflare).
+function client_ip(): string
+{
+    static $trust = null;
+    if ($trust === null) {
+        $cfg = is_file(APP_ROOT . '/config.php') ? require APP_ROOT . '/config.php' : [];
+        $trust = !empty($cfg['trust_cloudflare']);
+    }
+    $ip = $trust ? ($_SERVER['HTTP_CF_CONNECTING_IP'] ?? '') : '';
+    if (!filter_var($ip, FILTER_VALIDATE_IP)) {
+        $ip = (string)($_SERVER['REMOTE_ADDR'] ?? '');
+    }
+    return substr($ip, 0, 64);
+}
+
 /* ---------- CSRF ---------- */
 function session_boot(): void
 {

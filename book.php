@@ -27,7 +27,7 @@ if (!$ok) {
 }
 
 // Basic flood control: max 10 inquiries per IP per hour.
-$ip = substr((string)($_SERVER['REMOTE_ADDR'] ?? ''), 0, 64);
+$ip = client_ip();
 $st = db()->prepare("SELECT COUNT(*) FROM bookings WHERE ip = ? AND created_at > ?");
 $st->execute([$ip, date('Y-m-d H:i:s', time() - 3600)]);
 if ((int)$st->fetchColumn() >= 10) {
@@ -36,6 +36,6 @@ if ((int)$st->fetchColumn() >= 10) {
     exit;
 }
 
-db()->prepare('INSERT INTO bookings (name, phone, travel_date, persons, ticket_type, message, ip) VALUES (?,?,?,?,?,?,?)')
-    ->execute([$name, $phone, $date, $persons, mb_substr($type, 0, 100), mb_substr($message, 0, 1000), $ip]);
+db()->prepare('INSERT INTO bookings (name, phone, travel_date, persons, ticket_type, message, ip, created_at) VALUES (?,?,?,?,?,?,?,?)')
+    ->execute([$name, $phone, $date, $persons, mb_substr($type, 0, 100), mb_substr($message, 0, 1000), $ip, date('Y-m-d H:i:s')]);
 echo json_encode(['ok' => true]);

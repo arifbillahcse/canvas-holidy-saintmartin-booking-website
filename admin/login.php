@@ -5,7 +5,7 @@ if (admin_logged_in()) {
     exit;
 }
 $err = '';
-$ip = substr((string)($_SERVER['REMOTE_ADDR'] ?? ''), 0, 64);
+$ip = client_ip();
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $pdo = db();
     $pdo->prepare('DELETE FROM login_attempts WHERE created_at < ?')->execute([time() - 900]);

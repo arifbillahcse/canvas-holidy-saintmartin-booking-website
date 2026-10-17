@@ -6,4 +6,5 @@ return [
     'name'   => 'database_name',
     'user'   => 'database_user',
     'pass'   => 'database_password',
+    // 'trust_cloudflare' => true, // use CF-Connecting-IP for rate limits (only if all traffic is via Cloudflare)
 ];
