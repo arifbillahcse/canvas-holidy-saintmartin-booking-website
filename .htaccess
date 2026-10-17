@@ -1,0 +1,5 @@
+DirectoryIndex index.php
+Options -Indexes
+<FilesMatch "^(config\.php|config\.sample\.php|.*\.sqlite|readme\.md)$">
+  Require all denied
+</FilesMatch>

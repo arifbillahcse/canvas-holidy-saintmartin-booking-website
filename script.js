@@ -1,10 +1,7 @@
 (function () {
   'use strict';
 
-  /* ===== Config (এখান থেকেই নম্বর বদলাবেন) ===== */
-  var WHATSAPP_NUMBER = '8801779440297'; // country code সহ, + ছাড়া
-  var BUSINESS_NAME = 'ক্যানভাস হলিডেস';
-
+  /* ===== Config: নম্বর ও নাম অ্যাডমিন প্যানেল থেকে আসে (ফর্মের data-* অ্যাট্রিবিউট) ===== */
   var $ = function (s, c) { return (c || document).querySelector(s); };
   var $$ = function (s, c) { return Array.prototype.slice.call((c || document).querySelectorAll(s)); };
 
@@ -110,6 +107,8 @@
   /* ===== Booking form -> WhatsApp ===== */
   var form = $('#bookingForm');
   if (form) {
+    var WHATSAPP_NUMBER = form.getAttribute('data-wa') || '';
+    var BUSINESS_NAME = form.getAttribute('data-biz') || '';
     var errBox = $('.form__error', form);
     var dateInput = form.elements.date;
 
@@ -165,7 +164,15 @@
       if (msg) lines.push('মেসেজ: ' + msg);
 
       var url = 'https://wa.me/' + WHATSAPP_NUMBER + '?text=' + encodeURIComponent(lines.join('\n'));
+      // ব্রাউজারের পপআপ ব্লক এড়াতে আগে WhatsApp খুলি, তারপর বুকিং সার্ভারে সেভ করি
       window.open(url, '_blank', 'noopener');
+      try {
+        fetch(form.getAttribute('data-action') || 'book.php', {
+          method: 'POST',
+          body: new FormData(form),
+          keepalive: true
+        }).catch(function () {});
+      } catch (err) { /* সেভ ব্যর্থ হলেও WhatsApp চালু থাকবে */ }
       form.reset();
     });
   }

@@ -234,3 +234,6 @@ button,input,select,textarea{font:inherit;color:inherit}
 @media (prefers-reduced-motion:reduce){
   *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important;scroll-behavior:auto!important}
 }
+
+/* Uploaded logo image */
+.logo__img{display:block;height:44px;width:auto;max-width:220px;object-fit:contain}
