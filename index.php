@@ -169,7 +169,7 @@ $brand = brand_name();
       <p><?= e(setting('booking_text')) ?></p>
       <ul>
         <li>📞 ফোন: <a href="tel:<?= e($tel) ?>"><?= e($telText) ?></a></li>
-        <li>💬 WhatsApp: <a href="<?= e($waLink) ?>"><?= e(setting('whatsapp') ?: $telText) ?></a></li>
+        <li><?= wa_icon() ?> WhatsApp: <a href="<?= e($waLink) ?>"><?= e(setting('whatsapp') ?: $telText) ?></a></li>
         <li>👤 <?= e(setting('contact_person')) ?>, <?= e($brand) ?></li>
       </ul>
     </div>
@@ -211,7 +211,7 @@ $brand = brand_name();
       <p><strong><?= e(setting('contact_person')) ?></strong><br><?= e($brand) ?></p>
       <p>📍 <?= e(setting('address')) ?></p>
       <p>📞 <a href="tel:<?= e($tel) ?>"><?= e($telText) ?></a></p>
-      <p>💬 <a href="<?= e($waLink) ?>">WhatsApp-এ মেসেজ</a></p>
+      <p><?= wa_icon() ?> <a href="<?= e($waLink) ?>">WhatsApp-এ মেসেজ</a></p>
       <div class="social">
         <?php foreach (['facebook' => 'Facebook', 'instagram' => 'Instagram', 'youtube' => 'YouTube'] as $k => $label): if (setting($k) === '') continue; ?>
         <a href="<?= e(setting($k)) ?>" aria-label="<?= $label ?>" target="_blank" rel="noopener"><?= $label ?></a>

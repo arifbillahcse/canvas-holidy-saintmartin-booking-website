@@ -33,3 +33,9 @@ legend{font-weight:700;padding:0 .4rem}
 .auth__box label{display:grid;gap:.25rem}
 .hint{font-size:.85rem;color:#667}
 @media(max-width:760px){body{flex-direction:column}.side{width:100%}.side nav{display:flex;flex-wrap:wrap;gap:.2rem}}
+.side__credit{font-size:.8rem;color:#8fb0cc;margin-top:1.2rem}.side__credit a{color:#cfe2f3}
+.brand{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:1rem;margin-bottom:1.2rem}
+.brand>div{background:linear-gradient(160deg,#06284a,#0a6ea8);color:#fff;border-radius:12px;padding:1.2rem}
+.brand strong{font-size:1.4rem}.brand p{margin:.3rem 0 .8rem;opacity:.9}
+.sys-h{font-size:1.1rem;margin:1.2rem 0 .4rem}
+.sys th{width:42%;background:#f7fafc;font-weight:500}

@@ -186,7 +186,7 @@ button,input,select,textarea{font:inherit;color:inherit}
 .footer__inner{display:flex;justify-content:space-between;flex-wrap:wrap;gap:.5rem}
 
 /* Floating WhatsApp */
-.wa-float{position:fixed;right:18px;bottom:18px;width:58px;height:58px;border-radius:50%;background:#25d366;display:grid;place-items:center;font-size:1.7rem;z-index:60;box-shadow:0 8px 20px rgba(37,211,102,.5);animation:bounce 2.4s ease-in-out infinite}
+.wa-float{position:fixed;right:18px;bottom:18px;width:58px;height:58px;border-radius:50%;background:#25d366;display:grid;place-items:center;color:#fff;z-index:60;box-shadow:0 8px 20px rgba(37,211,102,.5);animation:bounce 2.4s ease-in-out infinite}
 .wa-float::after{content:"";position:absolute;inset:0;border-radius:50%;background:#25d366;z-index:-1;animation:ping 2s ease-out infinite}
 
 /* ===== Keyframes ===== */
@@ -273,3 +273,10 @@ body.inner{padding-top:0}
 .btn--small-x{padding:.45rem 1rem;font-size:.95rem}
 .cta-band{margin-top:3rem;background:var(--foam);border-radius:var(--r);padding:1.6rem;text-align:center;display:grid;gap:1rem;justify-items:center}
 @media (max-width:860px){.header--solid .nav a{color:var(--ink)}}
+
+/* WhatsApp glyph */
+.wa-ico{display:inline-block;vertical-align:-.2em;color:#25d366}
+.btn .wa-ico{color:currentColor}
+.wa-float__ico{width:32px;height:32px}
+.footer__credit{text-align:center;font-size:.78rem;opacity:.65;padding-top:.8rem}
+.footer__credit a{color:inherit;text-decoration:underline}

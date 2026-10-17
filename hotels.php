@@ -39,7 +39,7 @@ page_open(setting('hotels_page_title') ?: 'হোটেল লিস্টিং
 
     <div class="cta-band">
       <p>পছন্দের হোটেল খুঁজে পাচ্ছেন না? আমাদের জানান, আপনার বাজেট অনুযায়ী ব্যবস্থা করে দেব।</p>
-      <a class="btn btn--primary" href="https://wa.me/<?= e(wa_number()) ?>" target="_blank" rel="noopener">💬 WhatsApp-এ জানান</a>
+      <a class="btn btn--primary" href="https://wa.me/<?= e(wa_number()) ?>" target="_blank" rel="noopener"><?= wa_icon() ?> WhatsApp-এ জানান</a>
     </div>
   </div>
 </section>

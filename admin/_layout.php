@@ -6,6 +6,7 @@ function admin_head(string $title): void
         $nav['crud.php?t=' . $k] = $d['title'];
     }
     $nav['password.php'] = 'পাসওয়ার্ড';
+    $nav['system.php'] = 'সিস্টেম ইনফরমেশন';
     $cur = basename($_SERVER['SCRIPT_NAME']) . (isset($_GET['t']) ? '?t=' . $_GET['t'] : '');
     $f = flash();
     ?><!DOCTYPE html>
@@ -20,6 +21,7 @@ function admin_head(string $title): void
     <a href="../" target="_blank">সাইট দেখুন ↗</a>
     <a href="logout.php">লগআউট</a>
   </nav>
+  <p class="side__credit">Developed by <a href="https://softorio.com" target="_blank" rel="noopener">softorio.com</a></p>
 </aside>
 <main class="main">
   <h1><?= e($title) ?></h1>
