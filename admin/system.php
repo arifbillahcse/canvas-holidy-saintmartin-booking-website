@@ -3,6 +3,27 @@ require __DIR__ . '/_boot.php';
 require __DIR__ . '/_layout.php';
 admin_require();
 
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['act'] ?? '') === 'clear_cache') {
+    if (!csrf_check()) {
+        flash('সেশন মেয়াদোত্তীর্ণ, আবার চেষ্টা করুন।', 'err');
+    } else {
+        $done = [];
+        if (function_exists('opcache_reset') && @opcache_reset()) {
+            $done[] = 'PHP OPcache রিসেট';
+        }
+        clearstatcache(true);
+        $done[] = 'ফাইল স্ট্যাটাস ক্যাশ';
+        // New version string => browsers re-download style.css and script.js.
+        setting_save('asset_v', (string)time());
+        $done[] = 'ব্রাউজার CSS/JS ক্যাশ ভার্সন আপডেট';
+        db()->prepare('DELETE FROM login_attempts WHERE created_at < ?')->execute([time() - 900]);
+        $done[] = 'মেয়াদোত্তীর্ণ লগইন/রেজিস্ট্রেশন অ্যাটেম্পট মুছে ফেলা';
+        flash('ক্যাশ ক্লিয়ার হয়েছে: ' . implode(', ', $done) . '।');
+    }
+    header('Location: system.php');
+    exit;
+}
+
 $cfg = require APP_ROOT . '/config.php';
 $driver = $cfg['driver'] ?? 'mysql';
 try {
@@ -30,6 +51,7 @@ $rows = [
     'অ্যাপ্লিকেশন' => [
         'PHP ভার্সন' => PHP_VERSION . (version_compare(PHP_VERSION, '8.0.0', '>=') ? '' : ' (⚠ PHP 8.0+ প্রয়োজন)'),
         'PHP SAPI' => PHP_SAPI,
+        'OPcache' => (function_exists('opcache_get_status') && ($o = @opcache_get_status(false)) && !empty($o['opcache_enabled'])) ? 'চালু (' . $o['opcache_statistics']['num_cached_scripts'] . ' স্ক্রিপ্ট ক্যাশড)' : 'বন্ধ / উপলব্ধ নয়',
         'ডাটাবেস ড্রাইভার' => $driver,
         'ডাটাবেস ভার্সন' => $dbVersion,
         'সাইটে ছবি/বুকিং/হোটেল' => (function () {
@@ -76,6 +98,13 @@ admin_head('সিস্টেম ইনফরমেশন');
     <a class="btn" href="https://hostorio.com" target="_blank" rel="noopener">hostorio.com</a>
   </div>
 </section>
+
+<form method="post" class="cache-box" onsubmit="return confirm('ক্যাশ ক্লিয়ার করবেন?')">
+  <?= csrf_field() ?><input type="hidden" name="act" value="clear_cache">
+  <div><strong>ক্যাশ ক্লিয়ার</strong><p>PHP OPcache রিসেট, ব্রাউজারে CSS/JS নতুন করে লোড করানো এবং পুরোনো অ্যাটেম্পট রেকর্ড মোছা। সাইটের কনটেন্ট বা সেটিংস মুছবে না।</p></div>
+  <button class="btn">🧹 ক্যাশ ক্লিয়ার করুন</button>
+</form>
+<p class="hint">Cloudflare ব্যবহার করলে তার ড্যাশবোর্ড থেকে আলাদা করে "Purge Cache" দিতে হবে।</p>
 
 <?php foreach ($rows as $group => $items): ?>
 <h2 class="sys-h"><?= e($group) ?></h2>

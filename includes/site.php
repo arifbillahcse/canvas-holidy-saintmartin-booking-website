@@ -43,7 +43,7 @@ function page_open(string $title, string $desc, bool $home): void
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="style.css?v=<?= e(setting('asset_v', '1')) ?>">
 </head>
 <body<?= $home ? '' : ' class="inner"' ?>>
 
@@ -76,7 +76,7 @@ function page_close(): void
 
 <a href="https://wa.me/<?= e(wa_number()) ?>" class="wa-float" aria-label="WhatsApp-এ মেসেজ করুন" target="_blank" rel="noopener"><?= wa_icon('wa-float__ico') ?></a>
 
-<script src="script.js"></script>
+<script src="script.js?v=<?= e(setting('asset_v', '1')) ?>"></script>
 </body>
 </html>
 <?php
