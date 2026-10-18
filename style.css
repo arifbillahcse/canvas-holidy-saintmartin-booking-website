@@ -61,7 +61,7 @@ button,input,select,textarea{font:inherit;color:inherit}
 .cloud--1{top:16%;left:-200px;animation-duration:48s}
 .cloud--2{top:30%;left:-200px;animation-duration:70s;animation-delay:-25s;transform:scale(.7);opacity:.7}
 .cloud--3{top:10%;left:-200px;animation-duration:90s;animation-delay:-60s;transform:scale(1.2);opacity:.5}
-.bird{position:absolute;font-size:1.6rem;animation:fly 22s linear infinite}
+.bird{position:absolute;font-size:1.6rem;animation:fly 22s linear infinite;scale:-1 1} /* emoji faces left; flip so it faces its travel direction */
 .bird--1{top:24%;left:-60px}
 .bird--2{top:36%;left:-60px;animation-delay:-11s;font-size:1.2rem}
 .hero__content{position:relative;z-index:3}
@@ -76,7 +76,7 @@ button,input,select,textarea{font:inherit;color:inherit}
 
 /* Hero scene */
 .hero__scene{position:absolute;left:0;right:0;bottom:0;height:260px;z-index:2;pointer-events:none}
-.ship{position:absolute;bottom:70px;left:-120px;font-size:4.5rem;filter:drop-shadow(0 8px 8px rgba(0,0,0,.25));animation:sail 26s linear infinite,bob 3s ease-in-out infinite;z-index:1}
+.ship{position:absolute;bottom:70px;left:-120px;font-size:4.5rem;filter:drop-shadow(0 8px 8px rgba(0,0,0,.25));animation:sail 26s linear infinite,bob 3s ease-in-out infinite;z-index:1;scale:-1 1} /* flip: bow points right, same as sail direction */
 .float-icon{position:absolute;font-size:2rem;opacity:.9;animation:floaty 6s ease-in-out infinite}
 .fi--1{right:8%;top:-80px;animation-delay:0s}
 .fi--2{right:22%;top:20px;animation-delay:-1.5s}
