@@ -93,18 +93,7 @@ $brand = brand_name();
       <p><?= e(setting('ships_sub')) ?></p>
     </div>
     <div class="grid grid--3">
-      <?php foreach ($ships as $sh): ?>
-      <article class="ticket<?= $sh['featured'] ? ' ticket--featured' : '' ?>">
-        <div class="ticket__top"><?php if ($sh['tag'] !== ''): ?><span class="tag"><?= e($sh['tag']) ?></span><?php endif; ?><h3><?= e($sh['name']) ?></h3></div>
-        <ul>
-          <?php if ($sh['depart'] !== ''): ?><li>🕖 ছাড়ার সময়: <?= e($sh['depart']) ?></li><?php endif; ?>
-          <?php if ($sh['return_time'] !== ''): ?><li>🕓 ফেরার সময়: <?= e($sh['return_time']) ?></li><?php endif; ?>
-          <?php if ($sh['extra'] !== ''): ?><li><?= e($sh['extra']) ?></li><?php endif; ?>
-        </ul>
-        <div class="ticket__price">৳ <?= e($sh['price']) ?> <small>থেকে</small></div>
-        <a href="#booking" class="btn btn--primary btn--block">বুক করুন</a>
-      </article>
-      <?php endforeach; ?>
+      <?php foreach ($ships as $sh) { ship_card($sh); } ?>
     </div>
     <?php if (setting('ships_note') !== ''): ?><p class="note"><?= e(setting('ships_note')) ?></p><?php endif; ?>
   </div>

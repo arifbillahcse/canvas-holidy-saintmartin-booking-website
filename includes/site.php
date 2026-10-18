@@ -112,3 +112,37 @@ function hotel_card(array $h): void
 </article>
 <?php
 }
+
+// One ship/ticket card.
+function ship_card(array $sh): void
+{
+    $img = $sh['image'] ?? '';
+    $feat = lines_of($sh['features'] ?? '');
+    if (!$feat && ($sh['extra'] ?? '') !== '') {
+        $feat = [$sh['extra']];
+    }
+    $round = $sh['price_round'] ?? '';
+    $msg = 'আসসালামু আলাইকুম, ' . brand_name() . "।\nআমি \"" . $sh['name'] . '" সীপের টিকেট বুক করতে চাই।';
+    ?>
+<article class="ticket<?= $sh['featured'] ? ' ticket--featured' : '' ?><?= $img ? ' ticket--img' : '' ?>">
+  <?php if ($img): ?><div class="ticket__img" style="background-image:url('<?= e($img) ?>')" role="img" aria-label="<?= e($sh['name']) ?>"><?php if ($sh['tag'] !== ''): ?><span class="tag"><?= e($sh['tag']) ?></span><?php endif; ?></div><?php endif; ?>
+  <div class="ticket__body">
+    <div class="ticket__top"><?php if (!$img && $sh['tag'] !== ''): ?><span class="tag"><?= e($sh['tag']) ?></span><?php endif; ?><h3><?= e($sh['name']) ?></h3><?php if (($sh['subtitle'] ?? '') !== ''): ?><p class="ticket__sub"><?= e($sh['subtitle']) ?></p><?php endif; ?></div>
+    <div class="ticket__prices">
+      <?php if ($round !== ''): ?><div><strong>৳ <?= e($round) ?></strong><span>রাউন্ড ট্রিপ</span></div><?php endif; ?>
+      <?php if ($sh['price'] !== ''): ?><div><strong>৳ <?= e($sh['price']) ?></strong><span>সিঙ্গেল ট্রিপ</span></div><?php endif; ?>
+    </div>
+    <ul>
+      <?php if ($sh['depart'] !== ''): ?><li>🕖 ছাড়ার সময়: <?= e($sh['depart']) ?></li><?php endif; ?>
+      <?php if ($sh['return_time'] !== ''): ?><li>🕓 ফেরার সময়: <?= e($sh['return_time']) ?></li><?php endif; ?>
+      <?php if (($sh['seats'] ?? '') !== ''): ?><li>💺 সিট: <?= e($sh['seats']) ?></li><?php endif; ?>
+    </ul>
+    <?php if ($feat): ?><div class="ticket__feat"><b>ফিচারসমূহ</b><ul><?php foreach ($feat as $f): ?><li>✔ <?= e($f) ?></li><?php endforeach; ?></ul></div><?php endif; ?>
+    <div class="ticket__cta">
+      <a class="btn btn--ghost-dark" href="<?= e(tel_href()) ?>">📞 কল করুন</a>
+      <a class="btn btn--primary" href="https://wa.me/<?= e(wa_number()) ?>?text=<?= e(rawurlencode($msg)) ?>" target="_blank" rel="noopener"><?= wa_icon() ?> টিকেট বুক</a>
+    </div>
+  </div>
+</article>
+<?php
+}

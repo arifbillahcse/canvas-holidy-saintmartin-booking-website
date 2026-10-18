@@ -13,7 +13,7 @@ function schema_sql(string $driver): array
     $sql[] = "CREATE TABLE IF NOT EXISTS settings (k $key, v TEXT)$tail";
     $sql[] = "CREATE TABLE IF NOT EXISTS admins (id $id, username $str NOT NULL UNIQUE, password_hash $str NOT NULL, created_at $now)$tail";
     $sql[] = "CREATE TABLE IF NOT EXISTS login_attempts (id $id, ip $str NOT NULL, created_at INT NOT NULL)$tail";
-    $sql[] = "CREATE TABLE IF NOT EXISTS ships (id $id, sort_order INT NOT NULL DEFAULT 0, active TINYINT NOT NULL DEFAULT 1, tag $str, name $str NOT NULL, depart $str, return_time $str, extra $str, price $str, featured TINYINT NOT NULL DEFAULT 0)$tail";
+    $sql[] = "CREATE TABLE IF NOT EXISTS ships (id $id, sort_order INT NOT NULL DEFAULT 0, active TINYINT NOT NULL DEFAULT 1, tag $str, name $str NOT NULL, depart $str, return_time $str, extra $str, price $str, featured TINYINT NOT NULL DEFAULT 0, image $str NOT NULL DEFAULT '', subtitle $str NOT NULL DEFAULT '', price_round $str NOT NULL DEFAULT '', seats $str NOT NULL DEFAULT '', features TEXT)$tail";
     $sql[] = "CREATE TABLE IF NOT EXISTS packages (id $id, sort_order INT NOT NULL DEFAULT 0, active TINYINT NOT NULL DEFAULT 1, icon $str, name $str NOT NULL, summary $str, features TEXT, badge $str, hot TINYINT NOT NULL DEFAULT 0)$tail";
     $sql[] = "CREATE TABLE IF NOT EXISTS hotels (id $id, sort_order INT NOT NULL DEFAULT 0, active TINYINT NOT NULL DEFAULT 1, image $str NOT NULL DEFAULT '', name $str NOT NULL, location $str NOT NULL DEFAULT '', stars INT NOT NULL DEFAULT 3, rating $str NOT NULL DEFAULT '', price $str NOT NULL DEFAULT '', summary TEXT, amenities TEXT, badge $str NOT NULL DEFAULT '', featured TINYINT NOT NULL DEFAULT 0)$tail";
     $sql[] = "CREATE TABLE IF NOT EXISTS whys (id $id, sort_order INT NOT NULL DEFAULT 0, active TINYINT NOT NULL DEFAULT 1, icon $str, title $str NOT NULL, body TEXT)$tail";
@@ -23,6 +23,28 @@ function schema_sql(string $driver): array
     return $sql;
 }
 
+// Adds columns introduced after the first release (safe to run repeatedly).
+function migrate_schema(PDO $pdo, string $driver): void
+{
+    $add = ['ships' => [
+        'image' => "VARCHAR(255) NOT NULL DEFAULT ''", 'subtitle' => "VARCHAR(255) NOT NULL DEFAULT ''",
+        'price_round' => "VARCHAR(255) NOT NULL DEFAULT ''", 'seats' => "VARCHAR(255) NOT NULL DEFAULT ''",
+        'features' => 'TEXT',
+    ]];
+    foreach ($add as $table => $cols) {
+        if ($driver === 'sqlite') {
+            $have = array_column($pdo->query("PRAGMA table_info($table)")->fetchAll(), 'name');
+        } else {
+            $have = array_column($pdo->query("SHOW COLUMNS FROM $table")->fetchAll(), 'Field');
+        }
+        foreach ($cols as $c => $def) {
+            if (!in_array($c, $have, true)) {
+                $pdo->exec("ALTER TABLE $table ADD COLUMN $c " . ($driver === 'sqlite' ? str_replace('VARCHAR(255)', 'TEXT', $def) : $def));
+            }
+        }
+    }
+}
+
 // Admin CRUD definitions. type: text | textarea | check | number | image
 function crud_defs(): array
 {
@@ -30,12 +52,16 @@ function crud_defs(): array
         'ships' => [
             'title' => 'সীপ ও টিকেট', 'label' => 'name',
             'fields' => [
+                'image' => ['সীপ/কেবিনের ছবি (PNG/JPG/WebP, ২MB পর্যন্ত)', 'image'],
                 'tag' => ['টাইপ ট্যাগ (যেমন VIP)', 'text'],
-                'name' => ['সীপের নাম', 'text', true],
+                'name' => ['সীপ/ক্লাসের নাম (যেমন: Lavender (01 Person))', 'text', true],
+                'subtitle' => ['সাব-টাইটেল (যেমন: 1st Floor VIP Seats)', 'text'],
+                'price_round' => ['রাউন্ড ট্রিপ ভাড়া (যেমন ৩,৫০০)', 'text'],
+                'price' => ['সিঙ্গেল ট্রিপ ভাড়া (যেমন ১,৮০০)', 'text'],
                 'depart' => ['ছাড়ার সময়', 'text'],
                 'return_time' => ['ফেরার সময়', 'text'],
-                'extra' => ['অতিরিক্ত সুবিধা (ইমোজি সহ)', 'text'],
-                'price' => ['ভাড়া (যেমন ১,২০০)', 'text'],
+                'seats' => ['সিট সংখ্যা (যেমন: 70)', 'text'],
+                'features' => ['ফিচারসমূহ (প্রতি লাইনে একটি)', 'textarea'],
                 'featured' => ['হাইলাইট কার্ড', 'check'],
             ],
         ],

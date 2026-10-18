@@ -55,9 +55,9 @@ function seed_defaults(PDO $pdo): void
         ['icon' => '🏢', 'title' => 'অফিসে এসে নিন', 'body' => 'গুলশানে আমাদের অফিস থেকে সরাসরি টিকেট সংগ্রহ।'],
     ]);
     $ins('ships', [
-        ['tag' => 'VIP', 'name' => 'সীপের নাম ১', 'depart' => '০০:০০ AM', 'return_time' => '০০:০০ PM', 'extra' => '🛋️ এসি কেবিন, প্রিমিয়াম সিট', 'price' => '০,০০০', 'featured' => 0],
-        ['tag' => 'ডিলাক্স', 'name' => 'সীপের নাম ২', 'depart' => '০০:০০ AM', 'return_time' => '০০:০০ PM', 'extra' => '❄️ এসি সিট', 'price' => '০,০০০', 'featured' => 1],
-        ['tag' => 'সাধারণ', 'name' => 'সীপের নাম ৩', 'depart' => '০০:০০ AM', 'return_time' => '০০:০০ PM', 'extra' => '💺 সাধারণ সিট', 'price' => '০,০০০', 'featured' => 0],
+        ['tag' => 'VIP', 'name' => 'সীপের নাম ১', 'subtitle' => '১ম তলা VIP সিট', 'depart' => '০০:০০ AM', 'return_time' => '০০:০০ PM', 'price_round' => '০,০০০', 'price' => '০,০০০', 'seats' => '০০', 'features' => "এসি কেবিন\nপ্রিমিয়াম সিট\nপ্রার্থনা কক্ষ", 'featured' => 0],
+        ['tag' => 'ডিলাক্স', 'name' => 'সীপের নাম ২', 'subtitle' => 'এসি সিট', 'depart' => '০০:০০ AM', 'return_time' => '০০:০০ PM', 'price_round' => '০,০০০', 'price' => '০,০০০', 'seats' => '০০', 'features' => "এসি সিট\nকার্পেটেড ফ্লোর", 'featured' => 1],
+        ['tag' => 'সাধারণ', 'name' => 'সীপের নাম ৩', 'subtitle' => 'সাধারণ সিট', 'depart' => '০০:০০ AM', 'return_time' => '০০:০০ PM', 'price_round' => '০,০০০', 'price' => '০,০০০', 'seats' => '০০', 'features' => "সাধারণ সিট\nখোলা ডেক", 'featured' => 0],
     ]);
     $ins('hotels', [
         ['image' => '', 'name' => 'হোটেলের নাম ১', 'location' => 'সেন্ট মার্টিন', 'stars' => 4, 'rating' => '৪.৫/৫', 'price' => '০,০০০', 'summary' => 'সমুদ্রের কাছেই আরামদায়ক থাকার ব্যবস্থা।', 'amenities' => "এসি রুম\nসী-ভিউ\nনাস্তা ফ্রি\nওয়াইফাই", 'badge' => 'সী-ভিউ', 'featured' => 1],

@@ -8,6 +8,7 @@ $driver = (require APP_ROOT . '/config.php')['driver'] ?? 'mysql';
 foreach (schema_sql($driver) as $q) {
     $pdo->exec($q);
 }
+migrate_schema($pdo, $driver);
 $count = function ($sql) use ($pdo) { return (int)$pdo->query($sql)->fetchColumn(); };
 admin_head('ড্যাশবোর্ড');
 ?>
