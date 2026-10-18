@@ -1,4 +1,6 @@
 <?php
+const SCHEMA_VERSION = '3';
+
 // Table definitions + CRUD field definitions for the admin panel.
 
 function schema_sql(string $driver): array
@@ -15,7 +17,8 @@ function schema_sql(string $driver): array
     $sql[] = "CREATE TABLE IF NOT EXISTS login_attempts (id $id, ip $str NOT NULL, created_at INT NOT NULL)$tail";
     $sql[] = "CREATE TABLE IF NOT EXISTS ships (id $id, sort_order INT NOT NULL DEFAULT 0, active TINYINT NOT NULL DEFAULT 1, tag $str, name $str NOT NULL, depart $str, return_time $str, extra $str, price $str, featured TINYINT NOT NULL DEFAULT 0, image $str NOT NULL DEFAULT '', subtitle $str NOT NULL DEFAULT '', price_round $str NOT NULL DEFAULT '', seats $str NOT NULL DEFAULT '', features TEXT)$tail";
     $sql[] = "CREATE TABLE IF NOT EXISTS packages (id $id, sort_order INT NOT NULL DEFAULT 0, active TINYINT NOT NULL DEFAULT 1, icon $str, name $str NOT NULL, summary $str, features TEXT, badge $str, hot TINYINT NOT NULL DEFAULT 0)$tail";
-    $sql[] = "CREATE TABLE IF NOT EXISTS hotels (id $id, sort_order INT NOT NULL DEFAULT 0, active TINYINT NOT NULL DEFAULT 1, image $str NOT NULL DEFAULT '', name $str NOT NULL, location $str NOT NULL DEFAULT '', stars INT NOT NULL DEFAULT 3, rating $str NOT NULL DEFAULT '', price $str NOT NULL DEFAULT '', summary TEXT, amenities TEXT, badge $str NOT NULL DEFAULT '', featured TINYINT NOT NULL DEFAULT 0)$tail";
+    $sql[] = "CREATE TABLE IF NOT EXISTS hotels (id $id, sort_order INT NOT NULL DEFAULT 0, active TINYINT NOT NULL DEFAULT 1, image $str NOT NULL DEFAULT '', name $str NOT NULL, location $str NOT NULL DEFAULT '', stars INT NOT NULL DEFAULT 3, rating $str NOT NULL DEFAULT '', price $str NOT NULL DEFAULT '', summary TEXT, amenities TEXT, badge $str NOT NULL DEFAULT '', featured TINYINT NOT NULL DEFAULT 0, owner_id INT NULL, status VARCHAR(16) NOT NULL DEFAULT 'approved', reject_reason $str NOT NULL DEFAULT '', pending_data TEXT)$tail";
+    $sql[] = "CREATE TABLE IF NOT EXISTS owners (id $id, name $str NOT NULL, email $str NOT NULL UNIQUE, phone VARCHAR(32) NOT NULL, password_hash $str NOT NULL, status VARCHAR(16) NOT NULL DEFAULT 'pending', created_at $now)$tail";
     $sql[] = "CREATE TABLE IF NOT EXISTS whys (id $id, sort_order INT NOT NULL DEFAULT 0, active TINYINT NOT NULL DEFAULT 1, icon $str, title $str NOT NULL, body TEXT)$tail";
     $sql[] = "CREATE TABLE IF NOT EXISTS steps (id $id, sort_order INT NOT NULL DEFAULT 0, active TINYINT NOT NULL DEFAULT 1, title $str NOT NULL, body TEXT)$tail";
     $sql[] = "CREATE TABLE IF NOT EXISTS faqs (id $id, sort_order INT NOT NULL DEFAULT 0, active TINYINT NOT NULL DEFAULT 1, question $str NOT NULL, answer TEXT)$tail";
@@ -30,6 +33,9 @@ function migrate_schema(PDO $pdo, string $driver): void
         'image' => "VARCHAR(255) NOT NULL DEFAULT ''", 'subtitle' => "VARCHAR(255) NOT NULL DEFAULT ''",
         'price_round' => "VARCHAR(255) NOT NULL DEFAULT ''", 'seats' => "VARCHAR(255) NOT NULL DEFAULT ''",
         'features' => 'TEXT',
+    ], 'hotels' => [
+        'owner_id' => 'INT NULL', 'status' => "VARCHAR(16) NOT NULL DEFAULT 'approved'",
+        'reject_reason' => "VARCHAR(255) NOT NULL DEFAULT ''", 'pending_data' => 'TEXT',
     ]];
     foreach ($add as $table => $cols) {
         if ($driver === 'sqlite') {

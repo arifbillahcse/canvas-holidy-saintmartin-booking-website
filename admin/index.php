@@ -16,7 +16,8 @@ admin_head('ড্যাশবোর্ড');
   <div class="stat"><b><?= $count("SELECT COUNT(*) FROM bookings WHERE status='new'") ?></b>নতুন বুকিং</div>
   <div class="stat"><b><?= $count('SELECT COUNT(*) FROM bookings') ?></b>মোট বুকিং</div>
   <div class="stat"><b><?= $count('SELECT COUNT(*) FROM ships WHERE active=1') ?></b>সক্রিয় সীপ</div>
-  <div class="stat"><b><?= $count('SELECT COUNT(*) FROM hotels WHERE active=1') ?></b>সক্রিয় হোটেল</div>
+  <div class="stat"><b><?= $count("SELECT COUNT(*) FROM hotels WHERE active=1 AND status='approved'") ?></b>লাইভ হোটেল</div>
+  <div class="stat"><b><?= $count("SELECT COUNT(*) FROM hotels WHERE status='pending' OR (status='approved' AND pending_data IS NOT NULL AND pending_data <> '')") ?></b>অনুমোদনের অপেক্ষায়</div>
   <div class="stat"><b><?= $count('SELECT COUNT(*) FROM packages WHERE active=1') ?></b>সক্রিয় প্যাকেজ</div>
 </div>
 <p>বাম মেনু থেকে লোগো, ফোন নম্বর, ঠিকানা, সীপ/প্যাকেজ, FAQ ইত্যাদি পরিবর্তন করুন।</p>

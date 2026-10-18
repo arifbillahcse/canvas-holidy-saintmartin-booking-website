@@ -10,7 +10,7 @@ $packages = db()->query('SELECT * FROM packages WHERE active = 1 ORDER BY sort_o
 $whys = db()->query('SELECT * FROM whys WHERE active = 1 ORDER BY sort_order, id')->fetchAll();
 $steps = db()->query('SELECT * FROM steps WHERE active = 1 ORDER BY sort_order, id')->fetchAll();
 $faqs = db()->query('SELECT * FROM faqs WHERE active = 1 ORDER BY sort_order, id')->fetchAll();
-$hotels = db()->query('SELECT * FROM hotels WHERE active = 1 AND featured = 1 ORDER BY sort_order, id LIMIT 3')->fetchAll();
+$hotels = db()->query("SELECT * FROM hotels WHERE active = 1 AND status = 'approved' AND featured = 1 ORDER BY sort_order, id LIMIT 3")->fetchAll();
 $typed = lines_of(setting('typed_words'));
 $lines = 'lines_of';
 $brand = brand_name();

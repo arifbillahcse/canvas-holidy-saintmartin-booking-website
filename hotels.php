@@ -1,6 +1,6 @@
 <?php
 require __DIR__ . '/includes/site.php';
-$hotels = db()->query('SELECT * FROM hotels WHERE active = 1 ORDER BY sort_order, id')->fetchAll();
+$hotels = db()->query("SELECT * FROM hotels WHERE active = 1 AND status = 'approved' ORDER BY sort_order, id")->fetchAll();
 $locations = array_values(array_unique(array_filter(array_map(function ($h) { return $h['location']; }, $hotels))));
 page_open(setting('hotels_page_title') ?: 'হোটেল লিস্টিং', setting('hotels_sub', 'সেন্ট মার্টিনে আপনার বাজেট অনুযায়ী সেরা হোটেল বেছে নিন।'), false);
 ?>
@@ -36,6 +36,11 @@ page_open(setting('hotels_page_title') ?: 'হোটেল লিস্টিং
     <?php else: ?>
     <p class="note">শীঘ্রই হোটেল তালিকা যুক্ত হবে। বিস্তারিত জানতে কল করুন।</p>
     <?php endif; ?>
+
+    <div class="cta-band">
+      <p><strong>হোটেল মালিক?</strong> বিনামূল্যে রেজিস্ট্রেশন করে আপনার হোটেল আমাদের সাইটে যুক্ত করুন।</p>
+      <a class="btn btn--ghost-dark" href="owner/register.php">🏨 হোটেল যুক্ত করুন</a>
+    </div>
 
     <div class="cta-band">
       <p>পছন্দের হোটেল খুঁজে পাচ্ছেন না? আমাদের জানান, আপনার বাজেট অনুযায়ী ব্যবস্থা করে দেব।</p>

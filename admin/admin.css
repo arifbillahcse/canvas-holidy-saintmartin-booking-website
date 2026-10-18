@@ -39,3 +39,7 @@ legend{font-weight:700;padding:0 .4rem}
 .brand strong{font-size:1.4rem}.brand p{margin:.3rem 0 .8rem;opacity:.9}
 .sys-h{font-size:1.1rem;margin:1.2rem 0 .4rem}
 .sys th{width:42%;background:#f7fafc;font-weight:500}
+.card-admin{background:#fff;border-radius:12px;padding:1rem 1.2rem;margin-bottom:1rem}
+.card-admin h2{margin:0 0 .2rem;font-size:1.2rem}.card-admin small{color:#667;font-weight:400}
+.thumb{max-height:70px;vertical-align:middle;border-radius:6px}
+del{color:#9a1c0e}ins{color:#12643a;text-decoration:none;font-weight:600}

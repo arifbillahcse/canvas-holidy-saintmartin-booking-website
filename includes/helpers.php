@@ -20,8 +20,33 @@ function settings_all(): array
         foreach (db()->query('SELECT k, v FROM settings') as $r) {
             $cache[$r['k']] = $r['v'];
         }
+        if (($cache['schema_v'] ?? '') !== '3') {
+            ensure_schema();
+            $cache['schema_v'] = '3';
+        }
     }
     return $cache;
+}
+
+// Creates tables/columns added in later versions, once per schema version.
+function ensure_schema(): void
+{
+    require_once __DIR__ . '/schema.php';
+    $pdo = db();
+    $driver = $GLOBALS['db_driver'] ?? 'mysql';
+    foreach (schema_sql($driver) as $q) {
+        $pdo->exec($q);
+    }
+    migrate_schema($pdo, $driver);
+    $upd = $pdo->prepare('UPDATE settings SET v = ? WHERE k = ?');
+    $upd->execute([SCHEMA_VERSION, 'schema_v']);
+    if ($upd->rowCount() === 0) {
+        $has = $pdo->prepare('SELECT 1 FROM settings WHERE k = ?');
+        $has->execute(['schema_v']);
+        if (!$has->fetch()) {
+            $pdo->prepare('INSERT INTO settings (k, v) VALUES (?, ?)')->execute(['schema_v', SCHEMA_VERSION]);
+        }
+    }
 }
 
 function setting(string $key, string $default = ''): string

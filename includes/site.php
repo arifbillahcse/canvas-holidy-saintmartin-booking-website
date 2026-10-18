@@ -1,6 +1,7 @@
 <?php
 // Shared public layout (header/footer) used by index.php and hotels.php.
 require_once __DIR__ . '/helpers.php';
+settings_all(); // loads settings and runs any pending schema upgrade before pages query the DB
 
 function lines_of($t): array
 {

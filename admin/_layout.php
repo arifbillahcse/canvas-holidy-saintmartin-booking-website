@@ -1,7 +1,11 @@
 <?php
 function admin_head(string $title): void
 {
-    $nav = ['index.php' => 'ড্যাশবোর্ড', 'settings.php' => 'সাইট সেটিংস', 'bookings.php' => 'বুকিং'];
+    $pdo = db();
+    $pend = (int)$pdo->query("SELECT COUNT(*) FROM hotels WHERE status = 'pending' OR (status = 'approved' AND pending_data IS NOT NULL AND pending_data <> '')")->fetchColumn();
+    $newOwners = (int)$pdo->query("SELECT COUNT(*) FROM owners WHERE status = 'pending'")->fetchColumn();
+    $nav = ['index.php' => 'ড্যাশবোর্ড', 'settings.php' => 'সাইট সেটিংস', 'bookings.php' => 'বুকিং',
+        'moderation.php' => 'অনুমোদন' . ($pend ? " ($pend)" : ''), 'owners.php' => 'হোটেল মালিক' . ($newOwners ? " ($newOwners)" : '')];
     foreach (crud_defs() as $k => $d) {
         $nav['crud.php?t=' . $k] = $d['title'];
     }

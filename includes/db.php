@@ -16,6 +16,7 @@ function db(): PDO
         exit;
     }
     $c = require $file;
+    $GLOBALS['db_driver'] = $c['driver'] ?? 'mysql';
     if (($c['driver'] ?? 'mysql') === 'sqlite') {
         $pdo = new PDO('sqlite:' . $c['name']);
         $pdo->exec('PRAGMA foreign_keys = ON');
