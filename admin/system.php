@@ -2,24 +2,6 @@
 require __DIR__ . '/_boot.php';
 require __DIR__ . '/_layout.php';
 admin_require();
-require_once APP_ROOT . '/includes/dummy.php';
-
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && in_array($_POST['act'] ?? '', ['dummy_ships', 'dummy_hotels'], true)) {
-    if (!csrf_check()) {
-        flash('সেশন মেয়াদোত্তীর্ণ, আবার চেষ্টা করুন।', 'err');
-    } elseif ($_POST['act'] === 'dummy_ships') {
-        $n = ships_fill_dummy(db());
-        flash($n ? "$n টি সীপে ডামি ডাটা যোগ হয়েছে (শুধু ফাঁকা বা নমুনা-লেখা ঘর)। এখন সীপ এডিট করে আসল তথ্য ও ছবি দিন।" : 'সব সীপে আগে থেকেই তথ্য আছে, তাই কিছু যোগ হয়নি।');
-    } else {
-        $n = 0;
-        foreach (db()->query('SELECT id FROM hotels ORDER BY id')->fetchAll(PDO::FETCH_COLUMN) as $hid) {
-            $n += hotel_fill_dummy((int)$hid) ? 1 : 0;
-        }
-        flash($n ? "$n টি হোটেলে ডামি ডাটা যোগ হয়েছে (শুধু ফাঁকা জায়গা)। এখন হোটেল এডিট করে আসল তথ্য ও ছবি দিন।" : 'সব হোটেলে আগে থেকেই তথ্য, ছবি ও রুম আছে, তাই কিছু যোগ হয়নি।');
-    }
-    header('Location: system.php');
-    exit;
-}
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['act'] ?? '') === 'clear_cache') {
     if (!csrf_check()) {
@@ -122,13 +104,6 @@ admin_head('সিস্টেম ইনফরমেশন');
   <div><strong>ক্যাশ ক্লিয়ার</strong><p>PHP OPcache রিসেট, ব্রাউজারে CSS/JS নতুন করে লোড করানো এবং পুরোনো অ্যাটেম্পট রেকর্ড মোছা। সাইটের কনটেন্ট বা সেটিংস মুছবে না।</p></div>
   <button class="btn">🧹 ক্যাশ ক্লিয়ার করুন</button>
 </form>
-<div class="cache-box">
-  <div><strong>ডামি ডাটা যোগ করুন</strong><p>নতুন সাজানো ডিজাইনে সীপ ও হোটেল সুন্দর দেখানোর জন্য ফাঁকা ঘরে নমুনা তথ্য, ভাড়া ও রুম বসাবে। যা আগে থেকে দেওয়া আছে তা বদলাবে না; বারবার চাপলেও ক্ষতি নেই। পরে এডিট করে আসল তথ্য ও ছবি দিন।</p></div>
-  <div style="display:flex;gap:.6rem;flex-wrap:wrap">
-    <form method="post" onsubmit="return confirm('সব সীপের ফাঁকা ঘরে ডামি তথ্য ও ভাড়া বসবে। চালিয়ে যাবেন?')"><?= csrf_field() ?><input type="hidden" name="act" value="dummy_ships"><button class="btn">🚢 সীপে ডামি ডাটা</button></form>
-    <form method="post" onsubmit="return confirm('সব হোটেলের ফাঁকা জায়গায় ডামি তথ্য, Sample Photo ছবি ও ৪টি নমুনা রুম বসবে। চালিয়ে যাবেন?')"><?= csrf_field() ?><input type="hidden" name="act" value="dummy_hotels"><button class="btn">🏨 হোটেলে ডামি ডাটা</button></form>
-  </div>
-</div>
 <p class="hint">Cloudflare ব্যবহার করলে তার ড্যাশবোর্ড থেকে আলাদা করে "Purge Cache" দিতে হবে।</p>
 
 <?php foreach ($rows as $group => $items): ?>

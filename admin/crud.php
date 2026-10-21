@@ -10,7 +10,6 @@ if (!isset($defs[$t])) {
     exit('Not found');
 }
 $def = $defs[$t]; // $t is whitelisted, safe to interpolate as table name
-require_once APP_ROOT . '/includes/dummy.php';
 if ($t === 'hotels') {
     require_once APP_ROOT . '/includes/hotels.php';
     if (isset($_GET['edit'])) {
@@ -29,16 +28,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         header("Location: $self");
         exit;
     }
-    if ($act === 'dummy_ships' && $t === 'ships') {
-        $n = ships_fill_dummy($pdo);
-        flash($n ? "$n টি সীপে ডামি ডাটা যোগ হয়েছে (শুধু ফাঁকা বা নমুনা-লেখা ঘরগুলো)। এখন প্রতিটি সীপ এডিট করে আসল তথ্য ও ছবি দিন।" : 'সব সীপে আগে থেকেই তথ্য আছে, তাই কিছু যোগ হয়নি।');
-    } elseif ($act === 'dummy_data' && $t === 'hotels') {
-        $n = 0;
-        foreach ($pdo->query('SELECT id FROM hotels ORDER BY id')->fetchAll(PDO::FETCH_COLUMN) as $hid) {
-            $n += hotel_fill_dummy((int)$hid) ? 1 : 0;
-        }
-        flash($n ? "$n টি হোটেলে ডামি ডাটা যোগ হয়েছে (শুধু ফাঁকা জায়গাগুলো ভরা হয়েছে)। এখন প্রতিটি হোটেল এডিট করে আসল তথ্য ও ছবি দিন।" : 'সব হোটেলে আগে থেকেই তথ্য, ছবি ও রুম আছে, তাই কিছু যোগ হয়নি।');
-    } elseif ($act === 'delete' && $id && $t === 'hotels') {
+    if ($act === 'delete' && $id && $t === 'hotels') {
         hotel_delete($id);
         flash('মুছে ফেলা হয়েছে।');
     } elseif ($act === 'delete' && $id) {
@@ -161,13 +151,7 @@ if (isset($_GET['edit'])) {
 } else {
     $rows = $pdo->query("SELECT * FROM $t ORDER BY sort_order, id")->fetchAll();
     ?>
-<p><a class="btn" href="<?= e($self) ?>&edit=new">+ নতুন যোগ করুন</a>
-<?php if ($t === 'hotels'): ?>
-  <form method="post" style="display:inline" onsubmit="return confirm('সব হোটেলের ফাঁকা জায়গায় ডামি তথ্য, \'Sample Photo\' ছবি ও ৪টি নমুনা রুম (নমুনা ভাড়াসহ) যোগ হবে। যা আগে থেকে দেওয়া আছে তা বদলাবে না। চালিয়ে যাবেন?')"><?= csrf_field() ?><input type="hidden" name="act" value="dummy_data"><button class="sm">🧪 সব হোটেলে ডামি ডাটা যোগ করুন</button></form>
-<?php endif; ?>
-<?php if ($t === 'ships'): ?>
-  <form method="post" style="display:inline" onsubmit="return confirm('সব সীপের ফাঁকা ঘরে (এবং ভুলে সেভ হওয়া নমুনা-লেখায়) ডামি তথ্য ও ভাড়া বসবে। আসল তথ্য বদলাবে না। চালিয়ে যাবেন?')"><?= csrf_field() ?><input type="hidden" name="act" value="dummy_ships"><button class="sm">🧪 সব সীপে ডামি ডাটা যোগ করুন</button></form>
-<?php endif; ?></p>
+<p><a class="btn" href="<?= e($self) ?>&edit=new">+ নতুন যোগ করুন</a></p>
 <table class="tbl">
   <tr><th>#</th><th>শিরোনাম</th><th>অবস্থা</th><th>অ্যাকশন</th></tr>
   <?php foreach ($rows as $i => $r): ?>
