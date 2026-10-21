@@ -4,6 +4,13 @@ require_once __DIR__ . '/helpers.php';
 require_once __DIR__ . '/hotels.php';
 settings_all(); // loads settings and runs any pending schema upgrade before pages query the DB
 
+// Cache-busting version for a static asset: file modification time + the admin "clear cache" counter.
+function asset_ver(string $file): string
+{
+    $m = @filemtime(APP_ROOT . '/' . $file);
+    return ($m ? $m : '0') . '-' . setting('asset_v', '1');
+}
+
 function lines_of($t): array
 {
     return array_values(array_filter(array_map('trim', preg_split('/\R/u', (string)$t))));
@@ -44,7 +51,7 @@ function page_open(string $title, string $desc, bool $home, bool $overlay = fals
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=<?= e(setting('asset_v', '1')) ?>">
+<link rel="stylesheet" href="style.css?v=<?= e(asset_ver('style.css')) ?>">
 </head>
 <body<?= $home ? '' : ' class="inner ' . e($bodyClass) . '"' ?>>
 
@@ -77,7 +84,7 @@ function page_close(): void
 
 <a href="https://wa.me/<?= e(wa_number()) ?>" class="wa-float" aria-label="WhatsApp-এ মেসেজ করুন" target="_blank" rel="noopener"><?= wa_icon('wa-float__ico') ?></a>
 
-<script src="script.js?v=<?= e(setting('asset_v', '1')) ?>"></script>
+<script src="script.js?v=<?= e(asset_ver('script.js')) ?>"></script>
 </body>
 </html>
 <?php
