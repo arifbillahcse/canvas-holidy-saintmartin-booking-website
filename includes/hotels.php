@@ -34,15 +34,27 @@ function sample_rooms(): array
     ];
 }
 
-function room_label(array $r): string
+// Free-text room label -> [type key, custom name]. A label matching a standard type (English or Bangla,
+// any case) uses that type; anything else is a custom label stored as type "other" with the name.
+function room_type_from_label(string $label): array
 {
-    if (($r['type'] ?? 'other') === 'other' || trim((string)($r['name'] ?? '')) !== '') {
-        $n = trim((string)($r['name'] ?? ''));
-        if ($n !== '') {
-            return $n;
+    $label = trim($label);
+    if ($label === '') {
+        return ['', ''];
+    }
+    $l = mb_strtolower($label);
+    foreach (ROOM_TYPES as $k => [$name, , $hint]) {
+        if ($k !== 'other' && ($l === mb_strtolower($name) || $l === mb_strtolower($hint))) {
+            return [$k, ''];
         }
     }
-    return ROOM_TYPES[$r['type'] ?? 'other'][0] ?? 'Room';
+    return ['other', $label];
+}
+
+function room_label(array $r): string
+{
+    $n = trim((string)($r['name'] ?? ''));
+    return $n !== '' ? $n : (ROOM_TYPES[$r['type'] ?? ''][0] ?? '');
 }
 
 function room_icon(array $r): string
@@ -275,17 +287,17 @@ function hotel_collect(array $base, bool $admin): array
             }
             $rid = (int)($r['id'] ?? 0);
             $old = $baseRooms[$rid] ?? null;
-            $type = isset(ROOM_TYPES[$r['type'] ?? '']) ? $r['type'] : 'other';
-            $name = clean_text($r['name'] ?? '', 120);
+            [$type, $name] = room_type_from_label(clean_text($r['label'] ?? '', 120));
             $price = normalize_price($r['price'] ?? '');
             $rm = array_map('strval', (array)($r['img_remove'] ?? []));
             $images = $old ? array_values(array_diff($old['images'] ?? [], $rm)) : [];
             $files = uploaded_list('room_images', $i);
-            if ($name === '' && $price === 0 && !$files && !$images && clean_text($r['description'] ?? '', 5) === '') {
+            $blank = $name === '' && $type === '' && $price === 0 && !$files && !$images && clean_text($r['description'] ?? '', 5) === '';
+            if ($blank) {
                 continue; // blank row
             }
-            if ($type === 'other' && $name === '') {
-                throw new RuntimeException('"Other" রুমের একটি নাম দিন (যেমন: Budget Room)।');
+            if ($type === '') {
+                throw new RuntimeException('প্রতিটি রুমের একটি ধরন/নাম লিখুন বা তালিকা থেকে বেছে নিন (যেমন: AC Room, Honeymoon Suite)।');
             }
             foreach ($files as $file) {
                 if (count($images) >= MAX_ROOM_IMAGES) {

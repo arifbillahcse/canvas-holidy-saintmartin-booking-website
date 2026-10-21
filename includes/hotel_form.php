@@ -5,18 +5,15 @@ require_once __DIR__ . '/hotels.php';
 
 function hotel_room_block($i, array $r, string $assetPrefix): string
 {
-    $r += ['id' => 0, 'type' => 'single', 'name' => '', 'price' => '', 'persons' => '', 'beds' => '', 'ac' => 1, 'breakfast' => 0, 'description' => '', 'images' => []];
+    $r += ['id' => 0, 'type' => '', 'name' => '', 'price' => '', 'persons' => '', 'beds' => '', 'ac' => 1, 'breakfast' => 0, 'description' => '', 'images' => []];
     ob_start(); ?>
 <fieldset class="room-block">
   <legend>রুম</legend>
   <input type="hidden" name="rooms[<?= e($i) ?>][id]" value="<?= (int)$r['id'] ?>">
   <div class="two-col">
-    <label>রুমের ধরন
-      <select name="rooms[<?= e($i) ?>][type]" data-room-type>
-        <?php foreach (ROOM_TYPES as $k => [$lbl, $ico, $hint]): ?><option value="<?= e($k) ?>" <?= $r['type'] === $k ? 'selected' : '' ?>><?= e($lbl . ' — ' . $hint) ?></option><?php endforeach; ?>
-      </select>
+    <label>রুমের ধরন / নাম (তালিকা থেকে বেছে নিন বা নিজের মতো লিখুন)
+      <input name="rooms[<?= e($i) ?>][label]" value="<?= e(room_label($r)) ?>" list="roomTypeList" maxlength="120" placeholder="যেমন: AC Room, Single Bed, Honeymoon Suite" data-room-label autocomplete="off">
     </label>
-    <label>নিজের নাম (ঐচ্ছিক; "Other" হলে আবশ্যক, যেমন: Honeymoon Suite)<input name="rooms[<?= e($i) ?>][name]" value="<?= e($r['name']) ?>" maxlength="120"></label>
     <label>প্রতি রাতের ভাড়া (৳, শুধু সংখ্যা)<input name="rooms[<?= e($i) ?>][price]" value="<?= e($r['price'] ? $r['price'] : '') ?>" inputmode="numeric" placeholder="2500"></label>
     <label>কয়জন থাকতে পারবে<input name="rooms[<?= e($i) ?>][persons]" value="<?= e($r['persons']) ?>" placeholder="২ জন"></label>
     <label>বেড<input name="rooms[<?= e($i) ?>][beds]" value="<?= e($r['beds']) ?>" placeholder="১টি কুইন বেড"></label>
@@ -76,6 +73,7 @@ function hotel_form_fields(array $snap, bool $admin, string $assetPrefix): void
         echo hotel_room_block($i, $r, $assetPrefix);
         $max = $i;
     } ?></div>
+  <datalist id="roomTypeList"><?php foreach (ROOM_TYPES as $k => [$lbl, $ico, $hint]): if ($k === 'other') continue; ?><option value="<?= e($lbl) ?>"><?= e($hint) ?></option><?php endforeach; ?></datalist>
   <template id="roomTpl"><?= hotel_room_block('__I__', ['ac' => 1], $assetPrefix) ?></template>
   <button type="button" class="sm" id="addRoom">+ রুম যোগ করুন</button>
 </fieldset>
@@ -88,13 +86,14 @@ function hotel_form_fields(array $snap, bool $admin, string $assetPrefix): void
     wrap.appendChild(d.firstElementChild);
   }
   document.getElementById('addRoom').addEventListener('click', add);
-  // Picking "AC Room" / "Non-AC Room" also sets the AC field of that room.
-  wrap.addEventListener('change', function (e) {
-    var t = e.target.closest('[data-room-type]');
+  // Typing/picking "AC Room" / "Non-AC Room" also sets the AC field of that room.
+  wrap.addEventListener('input', function (e) {
+    var t = e.target.closest('[data-room-label]');
     if (!t) return;
+    var v = t.value.trim().toLowerCase();
     var ac = t.closest('.room-block').querySelector('select[name$="[ac]"]');
-    if (ac && t.value === 'ac') ac.value = '1';
-    if (ac && t.value === 'nonac') ac.value = '0';
+    if (ac && (v === 'ac room' || v === 'এসি রুম')) ac.value = '1';
+    if (ac && (v === 'non-ac room' || v === 'নন-এসি রুম')) ac.value = '0';
   });
   wrap.addEventListener('click', function (e) {
     var b = e.target.closest('[data-remove-room]');
