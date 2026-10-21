@@ -15,6 +15,17 @@ const MAX_GALLERY = 12;
 const MAX_ROOMS = 12;
 const MAX_ROOM_IMAGES = 6;
 
+// Editable starter rooms. Prefilled in the hotel editor and used by the bulk "add sample rooms" action.
+function sample_rooms(): array
+{
+    return [
+        ['id' => 0, 'type' => 'single', 'name' => '', 'price' => 1200, 'persons' => '১ জন', 'beds' => '১টি সিঙ্গেল বেড', 'ac' => 0, 'breakfast' => 0, 'description' => 'একজনের জন্য ছোট ও আরামদায়ক রুম।', 'images' => []],
+        ['id' => 0, 'type' => 'couple', 'name' => '', 'price' => 2500, 'persons' => '২ জন', 'beds' => '১টি কুইন বেড', 'ac' => 1, 'breakfast' => 1, 'description' => 'কাপলের জন্য এসি রুম, এটাচড বাথসহ।', 'images' => []],
+        ['id' => 0, 'type' => 'family', 'name' => '', 'price' => 4000, 'persons' => '৪ জন', 'beds' => '২টি বেড', 'ac' => 1, 'breakfast' => 1, 'description' => 'পরিবারের জন্য প্রশস্ত রুম।', 'images' => []],
+        ['id' => 0, 'type' => 'other', 'name' => 'Budget Room', 'price' => 800, 'persons' => '২ জন', 'beds' => 'সাধারণ বেড', 'ac' => 0, 'breakfast' => 0, 'description' => 'বাজেট-ফ্রেন্ডলি সাধারণ রুম।', 'images' => []],
+    ];
+}
+
 function room_label(array $r): string
 {
     if (($r['type'] ?? 'other') === 'other' || trim((string)($r['name'] ?? '')) !== '') {

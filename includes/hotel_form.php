@@ -67,10 +67,10 @@ function hotel_form_fields(array $snap, bool $admin, string $assetPrefix): void
 </fieldset>
 
 <fieldset><legend>রুমের ধরন, ছবি ও ভাড়া</legend>
-  <?php if (!$snap['rooms']): ?><p class="hint">এই হোটেলে এখনো কোনো রুম নেই। নিচের ৪টি রুমের মধ্যে যেগুলো আছে সেগুলোর ভাড়া ও ছবি দিন; খালি রাখলে সেটি বাদ যাবে। দরকার হলে "+ রুম যোগ করুন" চাপুন।</p><?php endif; ?>
+  <?php if (!$snap['rooms']): ?><p class="hint">স্যাম্পল রুম দেওয়া আছে (ধরন, ভাড়া ও তথ্য নমুনা মাত্র)। আপনার হোটেল অনুযায়ী ভাড়া/তথ্য বদলান, ছবি দিন, যে রুম নেই সেটি "✕ মুছুন" করুন, আর দরকারে "+ রুম যোগ করুন" দিয়ে আরও রুম যোগ করুন।</p><?php endif; ?>
   <div id="rooms"><?php
-    // A hotel without rooms starts with the four standard room types ready to fill in.
-    $rows = $snap['rooms'] ?: [['type' => 'single'], ['type' => 'couple'], ['type' => 'family'], ['type' => 'other']];
+    // A hotel without rooms starts with editable sample rooms.
+    $rows = $snap['rooms'] ?: sample_rooms();
     $max = -1;
     foreach (array_values($rows) as $i => $r) {
         echo hotel_room_block($i, $r, $assetPrefix);
