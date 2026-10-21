@@ -395,3 +395,5 @@ body.rm-open{overflow:hidden}
   .rm__grid{grid-template-columns:1fr}
   .hh__price{text-align:left}
 }
+.ticket__img--ph{display:grid;place-items:center;font-size:3.6rem;background:linear-gradient(135deg,var(--aqua),var(--sea))}
+.ticket__body>ul{flex:none}

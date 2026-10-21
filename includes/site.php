@@ -134,10 +134,11 @@ function ship_card(array $sh): void
     $round = $sh['price_round'] ?? '';
     $msg = 'আসসালামু আলাইকুম, ' . brand_name() . "।\nআমি \"" . $sh['name'] . '" সীপের টিকেট বুক করতে চাই।';
     ?>
-<article class="ticket<?= $sh['featured'] ? ' ticket--featured' : '' ?><?= $img ? ' ticket--img' : '' ?>">
-  <?php if ($img): ?><div class="ticket__img" style="background-image:url('<?= e($img) ?>')" role="img" aria-label="<?= e($sh['name']) ?>"><?php if ($sh['tag'] !== ''): ?><span class="tag"><?= e($sh['tag']) ?></span><?php endif; ?></div><?php endif; ?>
+<article class="ticket<?= $sh['featured'] ? ' ticket--featured' : '' ?> ticket--img">
+  <?php if ($img): ?><div class="ticket__img" style="background-image:url('<?= e($img) ?>')" role="img" aria-label="<?= e($sh['name']) ?>"><?php if ($sh['tag'] !== ''): ?><span class="tag"><?= e($sh['tag']) ?></span><?php endif; ?></div>
+  <?php else: ?><div class="ticket__img ticket__img--ph" aria-hidden="true"><span>🚢</span><?php if ($sh['tag'] !== ''): ?><span class="tag"><?= e($sh['tag']) ?></span><?php endif; ?></div><?php endif; ?>
   <div class="ticket__body">
-    <div class="ticket__top"><?php if (!$img && $sh['tag'] !== ''): ?><span class="tag"><?= e($sh['tag']) ?></span><?php endif; ?><h3><?= e($sh['name']) ?></h3><?php if (($sh['subtitle'] ?? '') !== ''): ?><p class="ticket__sub"><?= e($sh['subtitle']) ?></p><?php endif; ?></div>
+    <div class="ticket__top"><h3><?= e($sh['name']) ?></h3><?php if (($sh['subtitle'] ?? '') !== ''): ?><p class="ticket__sub"><?= e($sh['subtitle']) ?></p><?php endif; ?></div>
     <div class="ticket__prices">
       <?php if ($round !== ''): ?><div><strong>৳ <?= e($round) ?></strong><span>রাউন্ড ট্রিপ</span></div><?php endif; ?>
       <?php if ($sh['price'] !== ''): ?><div><strong>৳ <?= e($sh['price']) ?></strong><span>সিঙ্গেল ট্রিপ</span></div><?php endif; ?>
