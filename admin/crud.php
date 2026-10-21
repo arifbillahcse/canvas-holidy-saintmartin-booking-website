@@ -10,6 +10,7 @@ if (!isset($defs[$t])) {
     exit('Not found');
 }
 $def = $defs[$t]; // $t is whitelisted, safe to interpolate as table name
+require_once APP_ROOT . '/includes/dummy.php';
 if ($t === 'hotels') {
     require_once APP_ROOT . '/includes/hotels.php';
     if (isset($_GET['edit'])) {
@@ -29,32 +30,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         exit;
     }
     if ($act === 'dummy_ships' && $t === 'ships') {
-        // Fill empty fields (and leftover form-label text such as "সাব-টাইটেল" / "...(যেমন ৩,৫০০)") with sample values.
-        $isEmpty = function ($v) {
-            $v = trim((string)$v);
-            return $v === '' || mb_strpos($v, 'যেমন') !== false || $v === 'সাব-টাইটেল' || preg_match('/^[০0]{2}:[০0]{2}/u', $v);
-        };
-        $samples = [
-            ['VIP', '১ম তলা VIP সিট', '৩,৫০০', '১,৮০০', '০৭:৩০ AM', '০৩:০০ PM', '৭০', "এসি কেবিন\nপ্রিমিয়াম সিট\nনাস্তা ও পানীয়\nপ্রার্থনা কক্ষ"],
-            ['ডিলাক্স', '২য় তলা এসি সিট', '২,৮০০', '১,৫০০', '০৮:০০ AM', '০৩:৩০ PM', '১২০', "এসি সিট\nকার্পেটেড ফ্লোর\nখোলা ডেক"],
-            ['সাধারণ', 'সাধারণ সিট', '২,২০০', '১,২০০', '০৯:০০ AM', '০৪:০০ PM', '২০০', "সাধারণ সিট\nখোলা ডেক\nখাবার পানি"],
-        ];
-        $cols = ['tag', 'subtitle', 'price_round', 'price', 'depart', 'return_time', 'seats', 'features'];
-        $n = 0;
-        foreach ($pdo->query('SELECT * FROM ships ORDER BY sort_order, id')->fetchAll() as $i => $row) {
-            $set = [];
-            foreach ($cols as $k => $c) {
-                $cur = $row[$c] ?? '';
-                if ($isEmpty($cur) || ($c === 'price' && preg_match('/^[০0][,০0]*$/u', trim((string)$cur)))) {
-                    $set[$c] = $samples[$i % 3][$k];
-                }
-            }
-            if ($set) {
-                $sql = 'UPDATE ships SET ' . implode(', ', array_map(function ($c) { return "$c = ?"; }, array_keys($set))) . ' WHERE id = ?';
-                $pdo->prepare($sql)->execute(array_merge(array_values($set), [$row['id']]));
-                $n++;
-            }
-        }
+        $n = ships_fill_dummy($pdo);
         flash($n ? "$n টি সীপে ডামি ডাটা যোগ হয়েছে (শুধু ফাঁকা বা নমুনা-লেখা ঘরগুলো)। এখন প্রতিটি সীপ এডিট করে আসল তথ্য ও ছবি দিন।" : 'সব সীপে আগে থেকেই তথ্য আছে, তাই কিছু যোগ হয়নি।');
     } elseif ($act === 'dummy_data' && $t === 'hotels') {
         $n = 0;
