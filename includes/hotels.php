@@ -5,11 +5,19 @@
 // Owners' edits to a live hotel are staged as a snapshot in hotels.pending_data until an admin approves.
 require_once __DIR__ . '/helpers.php';
 
+// [label shown on the site, icon, hint shown in the editor dropdown]
 const ROOM_TYPES = [
-    'single' => ['Single Bed', '🛏️'],
-    'couple' => ['Couple Bed', '💑'],
-    'family' => ['Family Room', '👨‍👩‍👧‍👦'],
-    'other'  => ['Other', '🏨'],
+    'regular' => ['Regular Room', '🛏️', 'সাধারণ রুম'],
+    'ac'      => ['AC Room', '❄️', 'এসি রুম'],
+    'nonac'   => ['Non-AC Room', '🌀', 'নন-এসি রুম'],
+    'single'  => ['Single Bed', '🛏️', 'সিঙ্গেল বেড'],
+    'double'  => ['Double Bed', '🛌', 'ডাবল বেড'],
+    'couple'  => ['Couple Bed', '💑', 'কাপল রুম'],
+    'family'  => ['Family Room', '👨‍👩‍👧‍👦', 'ফ্যামিলি রুম'],
+    'deluxe'  => ['Deluxe Room', '⭐', 'ডিলাক্স রুম'],
+    'suite'   => ['Suite', '👑', 'স্যুট'],
+    'budget'  => ['Budget Room', '💸', 'বাজেট রুম'],
+    'other'   => ['Other', '🏨', 'অন্য (নিজের নাম দিন)'],
 ];
 const MAX_GALLERY = 12;
 const MAX_ROOMS = 12;

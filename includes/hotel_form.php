@@ -12,11 +12,11 @@ function hotel_room_block($i, array $r, string $assetPrefix): string
   <input type="hidden" name="rooms[<?= e($i) ?>][id]" value="<?= (int)$r['id'] ?>">
   <div class="two-col">
     <label>রুমের ধরন
-      <select name="rooms[<?= e($i) ?>][type]">
-        <?php foreach (ROOM_TYPES as $k => [$lbl]): ?><option value="<?= e($k) ?>" <?= $r['type'] === $k ? 'selected' : '' ?>><?= e($k === 'other' ? 'Other (নিজের নাম দিন)' : $lbl) ?></option><?php endforeach; ?>
+      <select name="rooms[<?= e($i) ?>][type]" data-room-type>
+        <?php foreach (ROOM_TYPES as $k => [$lbl, $ico, $hint]): ?><option value="<?= e($k) ?>" <?= $r['type'] === $k ? 'selected' : '' ?>><?= e($lbl . ' — ' . $hint) ?></option><?php endforeach; ?>
       </select>
     </label>
-    <label>নাম (Other হলে আবশ্যক, যেমন: Budget Room)<input name="rooms[<?= e($i) ?>][name]" value="<?= e($r['name']) ?>" maxlength="120"></label>
+    <label>নিজের নাম (ঐচ্ছিক; "Other" হলে আবশ্যক, যেমন: Honeymoon Suite)<input name="rooms[<?= e($i) ?>][name]" value="<?= e($r['name']) ?>" maxlength="120"></label>
     <label>প্রতি রাতের ভাড়া (৳, শুধু সংখ্যা)<input name="rooms[<?= e($i) ?>][price]" value="<?= e($r['price'] ? $r['price'] : '') ?>" inputmode="numeric" placeholder="2500"></label>
     <label>কয়জন থাকতে পারবে<input name="rooms[<?= e($i) ?>][persons]" value="<?= e($r['persons']) ?>" placeholder="২ জন"></label>
     <label>বেড<input name="rooms[<?= e($i) ?>][beds]" value="<?= e($r['beds']) ?>" placeholder="১টি কুইন বেড"></label>
@@ -88,6 +88,14 @@ function hotel_form_fields(array $snap, bool $admin, string $assetPrefix): void
     wrap.appendChild(d.firstElementChild);
   }
   document.getElementById('addRoom').addEventListener('click', add);
+  // Picking "AC Room" / "Non-AC Room" also sets the AC field of that room.
+  wrap.addEventListener('change', function (e) {
+    var t = e.target.closest('[data-room-type]');
+    if (!t) return;
+    var ac = t.closest('.room-block').querySelector('select[name$="[ac]"]');
+    if (ac && t.value === 'ac') ac.value = '1';
+    if (ac && t.value === 'nonac') ac.value = '0';
+  });
   wrap.addEventListener('click', function (e) {
     var b = e.target.closest('[data-remove-room]');
     if (b && confirm('এই রুমটি মুছে ফেলবেন?')) b.closest('.room-block').remove();
