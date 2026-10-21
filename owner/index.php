@@ -26,14 +26,14 @@ $label = ['pending' => 'অনুমোদনের অপেক্ষায়'
 owner_head('আমার হোটেল', $owner);
 ?>
 <p><a class="btn" href="hotel.php">+ নতুন হোটেল যোগ করুন</a></p>
-<p class="hint">নতুন হোটেল অ্যাডমিন অনুমোদন করলে সাইটে দেখা যাবে। লাইভ হোটেল এডিট করলে অ্যাডমিন অনুমোদন না করা পর্যন্ত আগের তথ্য দেখাবে।</p>
+<p class="hint">নতুন হোটেল অ্যাডমিন অনুমোদন করলে সাইটে দেখা যাবে। অনুমোদিত হোটেলে নতুন পোস্ট যোগ বা এডিট করলে সাথে সাথে সাইটে দেখাবে।</p>
 <table class="tbl">
   <tr><th>হোটেল</th><th>অবস্থা</th><th>অ্যাকশন</th></tr>
-  <?php foreach ($rows as $h): $hasEdit = trim((string)$h['pending_data']) !== ''; ?>
+  <?php foreach ($rows as $h): ?>
   <tr>
     <td><strong><?= e($h['name']) ?></strong><br><small><?= e($h['location']) ?></small>
       <?php if ($h['reject_reason'] !== ''): ?><br><small style="color:#9a1c0e">⚠ অ্যাডমিনের মন্তব্য: <?= e($h['reject_reason']) ?></small><?php endif; ?></td>
-    <td><?= e($label[$h['status']] ?? $h['status']) ?><?= $hasEdit ? '<br><small>✎ পরিবর্তন অনুমোদনের অপেক্ষায়</small>' : '' ?></td>
+    <td><?= e($label[$h['status']] ?? $h['status']) ?></td>
     <td class="acts">
       <a class="sm" href="hotel.php?id=<?= (int)$h['id'] ?>">এডিট</a>
       <form method="post" onsubmit="return confirm('হোটেলটি মুছে ফেলবেন?')"><?= csrf_field() ?><input type="hidden" name="act" value="delete"><input type="hidden" name="id" value="<?= (int)$h['id'] ?>"><button class="sm danger">মুছুন</button></form>

@@ -28,16 +28,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         header("Location: $self");
         exit;
     }
-    if ($act === 'sample_rooms' && $t === 'hotels') {
-        $n = 0;
-        foreach ($pdo->query('SELECT id FROM hotels WHERE id NOT IN (SELECT hotel_id FROM rooms)')->fetchAll(PDO::FETCH_COLUMN) as $hid) {
-            $snap = hotel_snapshot((int)$hid);
-            $snap['rooms'] = sample_rooms();
-            hotel_apply((int)$hid, $snap);
-            $n++;
-        }
-        flash($n ? "$n টি হোটেলে স্যাম্পল রুম যোগ হয়েছে। এখন প্রতিটি হোটেল এডিট করে ভাড়া ও ছবি ঠিক করুন।" : 'সব হোটেলেই আগে থেকে রুম আছে।');
-    } elseif ($act === 'delete' && $id && $t === 'hotels') {
+    if ($act === 'delete' && $id && $t === 'hotels') {
         hotel_delete($id);
         flash('মুছে ফেলা হয়েছে।');
     } elseif ($act === 'delete' && $id) {
@@ -161,9 +152,7 @@ if (isset($_GET['edit'])) {
     $rows = $pdo->query("SELECT * FROM $t ORDER BY sort_order, id")->fetchAll();
     ?>
 <p><a class="btn" href="<?= e($self) ?>&edit=new">+ নতুন যোগ করুন</a>
-<?php if ($t === 'hotels'): ?>
-  <form method="post" style="display:inline" onsubmit="return confirm('যেসব হোটেলে কোনো রুম নেই, সেগুলোতে ৪টি স্যাম্পল রুম (নমুনা ভাড়াসহ) যোগ হবে। চালিয়ে যাবেন?')"><?= csrf_field() ?><input type="hidden" name="act" value="sample_rooms"><button class="sm">🛏️ রুম নেই এমন সব হোটেলে স্যাম্পল রুম যোগ করুন</button></form>
-<?php endif; ?></p>
+</p>
 <table class="tbl">
   <tr><th>#</th><th>শিরোনাম</th><th>অবস্থা</th><th>অ্যাকশন</th></tr>
   <?php foreach ($rows as $i => $r): ?>

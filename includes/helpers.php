@@ -40,6 +40,7 @@ function ensure_schema(): void
         $pdo->exec($q);
     }
     migrate_schema($pdo, $driver);
+    migrate_posts($pdo, $driver);
     $upd = $pdo->prepare('UPDATE settings SET v = ? WHERE k = ?');
     $upd->execute([SCHEMA_VERSION, 'schema_v']);
     if ($upd->rowCount() === 0) {

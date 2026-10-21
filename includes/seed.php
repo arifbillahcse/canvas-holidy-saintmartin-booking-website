@@ -60,20 +60,20 @@ function seed_defaults(PDO $pdo): void
         ['tag' => 'সাধারণ', 'name' => 'সীপের নাম ৩', 'subtitle' => 'সাধারণ সিট', 'depart' => '০০:০০ AM', 'return_time' => '০০:০০ PM', 'price_round' => '০,০০০', 'price' => '০,০০০', 'seats' => '০০', 'features' => "সাধারণ সিট\nখোলা ডেক", 'featured' => 0],
     ]);
     $ins('hotels', [
-        ['image' => '', 'name' => 'হোটেলের নাম ১', 'location' => 'সেন্ট মার্টিন', 'stars' => 4, 'rating' => '৪.৫/৫', 'price' => '০,০০০', 'summary' => 'সমুদ্রের কাছেই আরামদায়ক থাকার ব্যবস্থা।', 'amenities' => "এসি রুম\nসী-ভিউ\nনাস্তা ফ্রি\nওয়াইফাই", 'badge' => 'সী-ভিউ', 'featured' => 1],
-        ['image' => '', 'name' => 'হোটেলের নাম ২', 'location' => 'সেন্ট মার্টিন', 'stars' => 3, 'rating' => '৪.২/৫', 'price' => '০,০০০', 'summary' => 'পরিবার ও বন্ধুদের জন্য বাজেট-ফ্রেন্ডলি রুম।', 'amenities' => "এসি/নন-এসি রুম\nনাস্তা\nজেনারেটর ব্যাকআপ", 'badge' => 'জনপ্রিয়', 'featured' => 1],
-        ['image' => '', 'name' => 'হোটেলের নাম ৩', 'location' => 'সেন্ট মার্টিন', 'stars' => 5, 'rating' => '৪.৮/৫', 'price' => '০,০০০', 'summary' => 'প্রাইভেট বিচ ও প্রিমিয়াম সার্ভিসসহ রিসোর্ট।', 'amenities' => "প্রাইভেট বিচ\nরেস্টুরেন্ট\nএসি স্যুট\nওয়াইফাই", 'badge' => 'প্রিমিয়াম', 'featured' => 1],
+        ['name' => 'হোটেলের নাম ১', 'location' => 'সেন্ট মার্টিন', 'summary' => 'সমুদ্রের কাছেই আরামদায়ক থাকার ব্যবস্থা।'],
+        ['name' => 'হোটেলের নাম ২', 'location' => 'সেন্ট মার্টিন', 'summary' => 'পরিবার ও বন্ধুদের জন্য বাজেট-ফ্রেন্ডলি রুম।'],
+        ['name' => 'হোটেলের নাম ৩', 'location' => 'সেন্ট মার্টিন', 'summary' => 'প্রাইভেট বিচ ও প্রিমিয়াম সার্ভিসসহ রিসোর্ট।'],
     ]);
-    $roomSets = [
-        ['single', '', 1200, '১ জন', '১টি সিঙ্গেল বেড', 0, 0, 'ছোট ও আরামদায়ক রুম, একজনের জন্য আদর্শ।'],
-        ['couple', '', 2500, '২ জন', '১টি কুইন বেড', 1, 1, 'কুইন সাইজ বেড, এসি ও এটাচড বাথ।'],
-        ['family', '', 4000, '৪ জন', '২টি বেড', 1, 1, 'পরিবারের জন্য প্রশস্ত রুম।'],
-        ['other', 'Budget Room', 800, '২ জন', 'সাধারণ বেড', 0, 0, 'বাজেট-ফ্রেন্ডলি রুম।'],
+    // Editable sample posts for every hotel (replace the text/price and add images from the admin).
+    $samples = [
+        ['Single Bed', "১ জন · ১টি সিঙ্গেল বেড · নন-এসি\nএকজনের জন্য ছোট ও আরামদায়ক রুম।", '৳ ১,২০০ / রাত'],
+        ['Couple Bed', "২ জন · ১টি কুইন বেড · এসি · নাস্তা ফ্রি\nকাপলের জন্য এসি রুম, এটাচড বাথসহ।", '৳ ২,৫০০ / রাত'],
+        ['Family Room', "৪ জন · ২টি বেড · এসি · নাস্তা ফ্রি\nপরিবারের জন্য প্রশস্ত রুম।", '৳ ৪,০০০ / রাত'],
+        ['Budget Room', "২ জন · সাধারণ বেড · নন-এসি\nবাজেট-ফ্রেন্ডলি সাধারণ রুম।", '৳ ৮০০ / রাত'],
     ];
     foreach ($pdo->query('SELECT id FROM hotels ORDER BY id')->fetchAll(PDO::FETCH_COLUMN) as $hid) {
-        foreach ($roomSets as $i => [$type, $nm, $pr, $pe, $be, $ac, $bf, $ds]) {
-            $pdo->prepare('INSERT INTO rooms (hotel_id, sort_order, type, name, price, persons, beds, ac, breakfast, description) VALUES (?,?,?,?,?,?,?,?,?,?)')
-                ->execute([$hid, $i, $type, $nm, $pr, $pe, $be, $ac, $bf, $ds]);
+        foreach ($samples as $i => [$title, $body, $price]) {
+            $pdo->prepare('INSERT INTO hotel_posts (hotel_id, sort_order, title, body, price) VALUES (?,?,?,?,?)')->execute([$hid, $i, $title, $body, $price]);
         }
     }
     $ins('packages', [

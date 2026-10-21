@@ -90,36 +90,16 @@ function page_close(): void
 <?php
 }
 
-// One hotel card (shared by the home section and the hotels page); links to the hotel detail page.
+// Home-page hotel tile: cover image (from the hotel's posts), name, location; links to the hotel's page.
 function hotel_card(array $h): void
 {
-    $stars = max(0, min(5, (int)$h['stars']));
-    $min = hotel_min_prices()[(int)$h['id']] ?? 0;
-    $price = $min ? fmt_price($min) : (string)$h['price'];
+    $cover = hotel_cover((int)$h['id']);
     $href = 'hotels.php?h=' . (int)$h['id'];
     ?>
-<article class="hotel" data-name="<?= e(mb_strtolower($h['name'] . ' ' . $h['location'])) ?>" data-stars="<?= $stars ?>" data-loc="<?= e($h['location']) ?>">
-  <a class="hotel__img"<?= $h['image'] ? ' style="background-image:url(\'' . e($h['image']) . '\')"' : '' ?> href="<?= e($href) ?>" aria-label="<?= e($h['name']) ?>">
-    <?php if (!$h['image']): ?><span aria-hidden="true">🏨</span><?php endif; ?>
-    <?php if ($h['badge'] !== ''): ?><em class="hotel__badge"><?= e($h['badge']) ?></em><?php endif; ?>
-  </a>
-  <div class="hotel__body">
-    <div class="hotel__meta">
-      <span class="hotel__stars" aria-label="<?= $stars ?> স্টার"><?= str_repeat('★', $stars) ?><i><?= str_repeat('★', 5 - $stars) ?></i></span>
-      <?php if ($h['rating'] !== ''): ?><span class="hotel__rating"><?= e($h['rating']) ?></span><?php endif; ?>
-    </div>
-    <h3><a href="<?= e($href) ?>"><?= e($h['name']) ?></a></h3>
-    <?php if ($h['location'] !== ''): ?><p class="hotel__loc">📍 <?= e($h['location']) ?></p><?php endif; ?>
-    <?php if ($h['summary'] !== ''): ?><p class="hotel__sum"><?= e($h['summary']) ?></p><?php endif; ?>
-    <div class="hotel__foot">
-      <div class="hotel__price"><?php if ($price !== ''): ?>৳ <?= e($price) ?> <small>/ রাত থেকে</small><?php endif; ?></div>
-      <div class="hotel__cta">
-        <a class="btn btn--primary btn--small-x" href="<?= e($href) ?>">রুম ও ভাড়া দেখুন</a>
-        <a class="btn btn--ghost-dark btn--small-x" href="<?= e(tel_href()) ?>" aria-label="কল করুন">📞</a>
-      </div>
-    </div>
-  </div>
-</article>
+<a class="htile" href="<?= e($href) ?>">
+  <span class="htile__img"<?= $cover ? ' style="background-image:url(\'' . e($cover) . '\')"' : '' ?>><?php if (!$cover): ?><span aria-hidden="true">🏨</span><?php endif; ?></span>
+  <span class="htile__body"><strong><?= e($h['name']) ?></strong><?php if ($h['location'] !== ''): ?><small>📍 <?= e($h['location']) ?></small><?php endif; ?><em>বিস্তারিত দেখুন →</em></span>
+</a>
 <?php
 }
 

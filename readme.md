@@ -19,15 +19,11 @@ PHP + MySQL (or SQLite) site with an admin panel. Requires PHP 8.0+ with PDO.
 - `uploads/` holds the logo/favicon; PHP execution is disabled there via `.htaccess` (Apache). On Nginx, deny PHP in `uploads/` and block `includes/` and `config.php`.
 - With SQLite, keep the generated `data-*.sqlite` file out of public access (Apache `.htaccess` blocks it; on Nginx add a deny rule).
 
-## Hotel owner panel
-- Owners register at `/owner/register.php` and cannot log in until the admin sets them to **সক্রিয়** (Admin → হোটেল মালিক).
-- New hotels from owners wait in **Admin → অনুমোদন**; nothing goes live without approval. Edits to a live hotel are staged and only replace the live data when approved (the live listing keeps the old data meanwhile). Rejections carry a reason the owner can see.
-- Hotel inquiries always go to the company WhatsApp/phone from Site Settings, never to the owner.
-- Suspending an owner takes their hotels offline; deleting an owner removes their hotels and images.
-- Existing installs upgrade their database automatically on the first page load after uploading the new files.
-
-## Hotel page (hotels.php)
-- `hotels.php` shows the hotel list first (search + star + area filters); clicking a hotel opens `hotels.php?h=ID`: hero with back link, sticky section menu, room cards, amenities, gallery (lightbox), map and "more hotels".
-- Clicking a room card opens a popup showing **only that room** (photos, bed, persons, AC, breakfast, price, WhatsApp/call). Links like `hotels.php?h=4&room=14` open the popup directly.
-- Hotels have a photo gallery (first photo = cover) and rooms: Single Bed, Couple Bed, Family Room or Other (custom name), each with its own photos and per-night price. Owners and admin manage them; owners' changes (including photos and rooms) go live only after admin approval.
-- Uploaded photos wider than 1600px are downscaled automatically (needs PHP GD). Keep `upload_max_filesize` / `post_max_size` high enough for several photos per submit (check Admin → সিস্টেম ইনফরমেশন).
+## Hotels
+- `hotels.php`: hotel names in a list on the left; the selected hotel's **posts** on the right (`hotels.php?h=ID`). The first hotel is open by default.
+- A post = images (up to 6, 3-4 looks best) + text + price. A hotel can have as many posts as needed (rooms, offers, packages...). Clicking an image opens a lightbox.
+- Admin → হোটেল লিস্টিং manages hotels and posts. Hotel owners register at `/owner/register.php`, are activated by the admin (Admin → হোটেল মালিক), then add/edit their own hotels and posts at `/owner/`.
+- A new hotel from an owner waits in Admin → অনুমোদন until approved; after that, post changes by the owner go live immediately. Admin can hide/delete any hotel.
+- Hotel inquiries always go to the company WhatsApp/phone from Site Settings.
+- Older installs: the previous rooms/gallery data is converted into posts automatically on the first page load after upgrading (old tables are left untouched).
+- Uploaded photos wider than 1600px are downscaled (needs PHP GD). Make sure `upload_max_filesize`/`post_max_size` allow several photos per save (see Admin → সিস্টেম ইনফরমেশন).

@@ -1,5 +1,5 @@
 <?php
-const SCHEMA_VERSION = '4';
+const SCHEMA_VERSION = '5';
 
 // Table definitions + CRUD field definitions for the admin panel.
 
@@ -17,11 +17,10 @@ function schema_sql(string $driver): array
     $sql[] = "CREATE TABLE IF NOT EXISTS login_attempts (id $id, ip $str NOT NULL, created_at INT NOT NULL)$tail";
     $sql[] = "CREATE TABLE IF NOT EXISTS ships (id $id, sort_order INT NOT NULL DEFAULT 0, active TINYINT NOT NULL DEFAULT 1, tag $str, name $str NOT NULL, depart $str, return_time $str, extra $str, price $str, featured TINYINT NOT NULL DEFAULT 0, image $str NOT NULL DEFAULT '', subtitle $str NOT NULL DEFAULT '', price_round $str NOT NULL DEFAULT '', seats $str NOT NULL DEFAULT '', features TEXT)$tail";
     $sql[] = "CREATE TABLE IF NOT EXISTS packages (id $id, sort_order INT NOT NULL DEFAULT 0, active TINYINT NOT NULL DEFAULT 1, icon $str, name $str NOT NULL, summary $str, features TEXT, badge $str, hot TINYINT NOT NULL DEFAULT 0)$tail";
-    $sql[] = "CREATE TABLE IF NOT EXISTS hotels (id $id, sort_order INT NOT NULL DEFAULT 0, active TINYINT NOT NULL DEFAULT 1, image $str NOT NULL DEFAULT '', name $str NOT NULL, location $str NOT NULL DEFAULT '', stars INT NOT NULL DEFAULT 3, rating $str NOT NULL DEFAULT '', price $str NOT NULL DEFAULT '', summary TEXT, amenities TEXT, badge $str NOT NULL DEFAULT '', featured TINYINT NOT NULL DEFAULT 0, owner_id INT NULL, status VARCHAR(16) NOT NULL DEFAULT 'approved', reject_reason $str NOT NULL DEFAULT '', pending_data TEXT)$tail";
+    $sql[] = "CREATE TABLE IF NOT EXISTS hotels (id $id, sort_order INT NOT NULL DEFAULT 0, active TINYINT NOT NULL DEFAULT 1, name $str NOT NULL, location $str NOT NULL DEFAULT '', summary TEXT, owner_id INT NULL, status VARCHAR(16) NOT NULL DEFAULT 'approved', reject_reason $str NOT NULL DEFAULT '')$tail";
     $sql[] = "CREATE TABLE IF NOT EXISTS owners (id $id, name $str NOT NULL, email $str NOT NULL UNIQUE, phone VARCHAR(32) NOT NULL, password_hash $str NOT NULL, status VARCHAR(16) NOT NULL DEFAULT 'pending', created_at $now)$tail";
-    $sql[] = "CREATE TABLE IF NOT EXISTS hotel_images (id $id, hotel_id INT NOT NULL, path $str NOT NULL, sort_order INT NOT NULL DEFAULT 0)$tail";
-    $sql[] = "CREATE TABLE IF NOT EXISTS rooms (id $id, hotel_id INT NOT NULL, sort_order INT NOT NULL DEFAULT 0, type VARCHAR(16) NOT NULL DEFAULT 'other', name $str NOT NULL DEFAULT '', price INT NOT NULL DEFAULT 0, persons $str NOT NULL DEFAULT '', beds $str NOT NULL DEFAULT '', ac TINYINT NOT NULL DEFAULT 1, breakfast TINYINT NOT NULL DEFAULT 0, description TEXT)$tail";
-    $sql[] = "CREATE TABLE IF NOT EXISTS room_images (id $id, room_id INT NOT NULL, path $str NOT NULL, sort_order INT NOT NULL DEFAULT 0)$tail";
+    $sql[] = "CREATE TABLE IF NOT EXISTS hotel_posts (id $id, hotel_id INT NOT NULL, sort_order INT NOT NULL DEFAULT 0, title $str NOT NULL DEFAULT '', body TEXT, price VARCHAR(80) NOT NULL DEFAULT '')$tail";
+    $sql[] = "CREATE TABLE IF NOT EXISTS post_images (id $id, post_id INT NOT NULL, path $str NOT NULL, sort_order INT NOT NULL DEFAULT 0)$tail";
     $sql[] = "CREATE TABLE IF NOT EXISTS whys (id $id, sort_order INT NOT NULL DEFAULT 0, active TINYINT NOT NULL DEFAULT 1, icon $str, title $str NOT NULL, body TEXT)$tail";
     $sql[] = "CREATE TABLE IF NOT EXISTS steps (id $id, sort_order INT NOT NULL DEFAULT 0, active TINYINT NOT NULL DEFAULT 1, title $str NOT NULL, body TEXT)$tail";
     $sql[] = "CREATE TABLE IF NOT EXISTS faqs (id $id, sort_order INT NOT NULL DEFAULT 0, active TINYINT NOT NULL DEFAULT 1, question $str NOT NULL, answer TEXT)$tail";
@@ -38,7 +37,7 @@ function migrate_schema(PDO $pdo, string $driver): void
         'features' => 'TEXT',
     ], 'hotels' => [
         'owner_id' => 'INT NULL', 'status' => "VARCHAR(16) NOT NULL DEFAULT 'approved'",
-        'reject_reason' => "VARCHAR(255) NOT NULL DEFAULT ''", 'pending_data' => 'TEXT',
+        'reject_reason' => "VARCHAR(255) NOT NULL DEFAULT ''",
     ]];
     foreach ($add as $table => $cols) {
         if ($driver === 'sqlite') {
@@ -50,6 +49,32 @@ function migrate_schema(PDO $pdo, string $driver): void
             if (!in_array($c, $have, true)) {
                 $pdo->exec("ALTER TABLE $table ADD COLUMN $c " . ($driver === 'sqlite' ? str_replace('VARCHAR(255)', 'TEXT', $def) : $def));
             }
+        }
+    }
+}
+
+// One-time conversion of the older room/gallery model into posts (old tables are left untouched).
+function migrate_posts(PDO $pdo, string $driver): void
+{
+    $has = $driver === 'sqlite'
+        ? (bool)$pdo->query("SELECT 1 FROM sqlite_master WHERE type='table' AND name='rooms'")->fetch()
+        : (bool)$pdo->query("SHOW TABLES LIKE 'rooms'")->fetch();
+    if (!$has || (int)$pdo->query('SELECT COUNT(*) FROM hotel_posts')->fetchColumn() > 0) {
+        return;
+    }
+    $types = ['single' => 'Single Bed', 'couple' => 'Couple Bed', 'family' => 'Family Room'];
+    $im = $pdo->prepare('SELECT path FROM room_images WHERE room_id = ? ORDER BY sort_order, id');
+    $ins = $pdo->prepare('INSERT INTO hotel_posts (hotel_id, sort_order, title, body, price) VALUES (?,?,?,?,?)');
+    $img = $pdo->prepare('INSERT INTO post_images (post_id, path, sort_order) VALUES (?,?,?)');
+    foreach ($pdo->query('SELECT * FROM rooms ORDER BY hotel_id, sort_order, id')->fetchAll() as $n => $r) {
+        $title = trim((string)$r['name']) !== '' ? $r['name'] : ($types[$r['type']] ?? 'Room');
+        $parts = array_filter([$r['persons'], $r['beds'], $r['ac'] ? 'এসি' : 'নন-এসি', $r['breakfast'] ? 'নাস্তা ফ্রি' : '']);
+        $body = trim(implode(' · ', $parts) . "\n" . $r['description']);
+        $ins->execute([$r['hotel_id'], $n, $title, $body, $r['price'] > 0 ? '৳ ' . number_format((int)$r['price']) . ' / রাত' : '']);
+        $pid = (int)$pdo->lastInsertId();
+        $im->execute([$r['id']]);
+        foreach ($im->fetchAll(PDO::FETCH_COLUMN) as $j => $path) {
+            $img->execute([$pid, $path, $j]);
         }
     }
 }
@@ -74,21 +99,7 @@ function crud_defs(): array
                 'featured' => ['হাইলাইট কার্ড', 'check'],
             ],
         ],
-        'hotels' => [
-            'title' => 'হোটেল লিস্টিং', 'label' => 'name',
-            'fields' => [
-                'image' => ['হোটেলের ছবি (PNG/JPG/WebP, ২MB পর্যন্ত)', 'image'],
-                'name' => ['হোটেলের নাম', 'text', true],
-                'location' => ['এলাকা/লোকেশন (যেমন: সেন্ট মার্টিন, জেটি ঘাট)', 'text'],
-                'stars' => ['স্টার (১-৫)', 'number'],
-                'rating' => ['রেটিং (যেমন: ৪.৫/৫)', 'text'],
-                'price' => ['প্রতি রাতের ভাড়া (যেমন: ২,৫০০)', 'text'],
-                'summary' => ['সংক্ষিপ্ত বিবরণ', 'textarea'],
-                'amenities' => ['সুবিধাসমূহ (প্রতি লাইনে একটি)', 'textarea'],
-                'badge' => ['ব্যাজ (যেমন: সী-ভিউ)', 'text'],
-                'featured' => ['হোমপেজে দেখান', 'check'],
-            ],
-        ],
+        'hotels' => ['title' => 'হোটেল লিস্টিং', 'label' => 'name', 'fields' => []],
         'packages' => [
             'title' => 'রাত্রিযাপন প্যাকেজ', 'label' => 'name',
             'fields' => [

@@ -2,7 +2,7 @@
 function admin_head(string $title): void
 {
     $pdo = db();
-    $pend = (int)$pdo->query("SELECT COUNT(*) FROM hotels WHERE status = 'pending' OR (status = 'approved' AND pending_data IS NOT NULL AND pending_data <> '')")->fetchColumn();
+    $pend = (int)$pdo->query("SELECT COUNT(*) FROM hotels WHERE status = 'pending'")->fetchColumn();
     $newOwners = (int)$pdo->query("SELECT COUNT(*) FROM owners WHERE status = 'pending'")->fetchColumn();
     $nav = ['index.php' => 'ড্যাশবোর্ড', 'settings.php' => 'সাইট সেটিংস', 'bookings.php' => 'বুকিং',
         'moderation.php' => 'অনুমোদন' . ($pend ? " ($pend)" : ''), 'owners.php' => 'হোটেল মালিক' . ($newOwners ? " ($newOwners)" : '')];
