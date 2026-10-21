@@ -28,15 +28,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         header("Location: $self");
         exit;
     }
-    if ($act === 'sample_rooms' && $t === 'hotels') {
+    if ($act === 'dummy_data' && $t === 'hotels') {
         $n = 0;
-        foreach ($pdo->query('SELECT id FROM hotels WHERE id NOT IN (SELECT hotel_id FROM rooms)')->fetchAll(PDO::FETCH_COLUMN) as $hid) {
-            $snap = hotel_snapshot((int)$hid);
-            $snap['rooms'] = sample_rooms();
-            hotel_apply((int)$hid, $snap);
-            $n++;
+        foreach ($pdo->query('SELECT id FROM hotels ORDER BY id')->fetchAll(PDO::FETCH_COLUMN) as $hid) {
+            $n += hotel_fill_dummy((int)$hid) ? 1 : 0;
         }
-        flash($n ? "$n টি হোটেলে স্যাম্পল রুম যোগ হয়েছে। এখন প্রতিটি হোটেল এডিট করে ভাড়া ও ছবি ঠিক করুন।" : 'সব হোটেলেই আগে থেকে রুম আছে।');
+        flash($n ? "$n টি হোটেলে ডামি ডাটা যোগ হয়েছে (শুধু ফাঁকা জায়গাগুলো ভরা হয়েছে)। এখন প্রতিটি হোটেল এডিট করে আসল তথ্য ও ছবি দিন।" : 'সব হোটেলে আগে থেকেই তথ্য, ছবি ও রুম আছে, তাই কিছু যোগ হয়নি।');
     } elseif ($act === 'delete' && $id && $t === 'hotels') {
         hotel_delete($id);
         flash('মুছে ফেলা হয়েছে।');
@@ -162,7 +159,7 @@ if (isset($_GET['edit'])) {
     ?>
 <p><a class="btn" href="<?= e($self) ?>&edit=new">+ নতুন যোগ করুন</a>
 <?php if ($t === 'hotels'): ?>
-  <form method="post" style="display:inline" onsubmit="return confirm('যেসব হোটেলে কোনো রুম নেই, সেগুলোতে ৪টি স্যাম্পল রুম (নমুনা ভাড়াসহ) যোগ হবে। চালিয়ে যাবেন?')"><?= csrf_field() ?><input type="hidden" name="act" value="sample_rooms"><button class="sm">🛏️ রুম নেই এমন সব হোটেলে স্যাম্পল রুম যোগ করুন</button></form>
+  <form method="post" style="display:inline" onsubmit="return confirm('সব হোটেলের ফাঁকা জায়গায় ডামি তথ্য, \'Sample Photo\' ছবি ও ৪টি নমুনা রুম (নমুনা ভাড়াসহ) যোগ হবে। যা আগে থেকে দেওয়া আছে তা বদলাবে না। চালিয়ে যাবেন?')"><?= csrf_field() ?><input type="hidden" name="act" value="dummy_data"><button class="sm">🧪 সব হোটেলে ডামি ডাটা যোগ করুন</button></form>
 <?php endif; ?></p>
 <table class="tbl">
   <tr><th>#</th><th>শিরোনাম</th><th>অবস্থা</th><th>অ্যাকশন</th></tr>
