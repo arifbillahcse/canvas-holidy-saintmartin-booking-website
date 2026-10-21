@@ -7,11 +7,56 @@ foreach ($all as $h) {
         $hotel = $h;
     }
 }
-$hotel = $hotel ?: ($all[0] ?? null);
 
 if (!$hotel) {
-    page_open(setting('hotels_page_title') ?: 'হোটেল লিস্টিং', setting('hotels_sub'), false);
-    echo '<main><section class="page-hero"><div class="container"><h1>' . e(setting('hotels_title', 'থাকার হোটেল ও রিসোর্ট')) . '</h1><p>শীঘ্রই হোটেল তালিকা যুক্ত হবে। বিস্তারিত জানতে কল করুন।</p></div></section></main>';
+    // ----- Hotel list (default view) -----
+    $locations = array_values(array_unique(array_filter(array_map(function ($h) { return $h['location']; }, $all))));
+    page_open(setting('hotels_page_title') ?: 'হোটেল লিস্টিং', setting('hotels_sub', 'সেন্ট মার্টিনে আপনার বাজেট অনুযায়ী সেরা হোটেল বেছে নিন।'), false);
+    ?>
+<main>
+<section class="page-hero">
+  <div class="container">
+    <h1><?= e(setting('hotels_title', 'থাকার হোটেল ও রিসোর্ট')) ?></h1>
+    <p><?= e(setting('hotels_sub', 'সেন্ট মার্টিনে আপনার বাজেট অনুযায়ী সেরা হোটেল বেছে নিন।')) ?></p>
+  </div>
+</section>
+
+<section class="section" id="hotel-list">
+  <div class="container">
+    <?php if ($all): ?>
+    <div class="filters" id="hotelFilters">
+      <input type="search" id="hSearch" placeholder="🔍 হোটেলের নাম বা এলাকা খুঁজুন" aria-label="হোটেল খুঁজুন">
+      <select id="hStars" aria-label="স্টার">
+        <option value="0">সব স্টার</option>
+        <?php for ($i = 5; $i >= 1; $i--): ?><option value="<?= $i ?>"><?= bn_digits($i) ?> স্টার ও তার বেশি</option><?php endfor; ?>
+      </select>
+      <?php if (count($locations) > 1): ?>
+      <select id="hLoc" aria-label="এলাকা">
+        <option value="">সব এলাকা</option>
+        <?php foreach ($locations as $l): ?><option><?= e($l) ?></option><?php endforeach; ?>
+      </select>
+      <?php endif; ?>
+    </div>
+    <div class="grid grid--3" id="hotelGrid">
+      <?php foreach ($all as $h) { hotel_card($h); } ?>
+    </div>
+    <p class="note" id="hEmpty" hidden>কোনো হোটেল পাওয়া যায়নি। অন্য ফিল্টার চেষ্টা করুন বা কল করুন।</p>
+    <?php else: ?>
+    <p class="note">শীঘ্রই হোটেল তালিকা যুক্ত হবে। বিস্তারিত জানতে কল করুন।</p>
+    <?php endif; ?>
+
+    <div class="cta-band">
+      <p>পছন্দের হোটেল খুঁজে পাচ্ছেন না? আমাদের জানান, আপনার বাজেট অনুযায়ী ব্যবস্থা করে দেব।</p>
+      <a class="btn btn--wa" href="https://wa.me/<?= e(wa_number()) ?>" target="_blank" rel="noopener"><?= wa_icon() ?> WhatsApp-এ জানান</a>
+    </div>
+    <div class="cta-band">
+      <p><strong>হোটেল মালিক?</strong> বিনামূল্যে রেজিস্ট্রেশন করে আপনার হোটেল আমাদের সাইটে যুক্ত করুন।</p>
+      <a class="btn btn--ghost-dark" href="owner/register.php">🏨 হোটেল যুক্ত করুন</a>
+    </div>
+  </div>
+</section>
+</main>
+<?php
     page_close();
     return;
 }
@@ -50,9 +95,7 @@ page_open($hotel['name'] . ' | ' . brand_name(), $hotel['summary'] !== '' ? $hot
   <div class="hh__bg"<?= $cover ? ' style="background-image:url(\'' . e($cover) . '\')"' : '' ?>></div>
   <div class="hh__shade"></div>
   <div class="container hh__in">
-    <nav class="pills" aria-label="হোটেল বেছে নিন">
-      <?php foreach ($all as $h): ?><a href="hotels.php?h=<?= (int)$h['id'] ?>" class="<?= $h['id'] === $hotel['id'] ? 'on' : '' ?>"><?= e($h['name']) ?></a><?php endforeach; ?>
-    </nav>
+    <nav class="pills" aria-label="পেজ নেভিগেশন"><a href="hotels.php">← সব হোটেল</a></nav>
     <div class="hh__title">
       <div>
         <h1><?= e($hotel['name']) ?></h1>

@@ -27,7 +27,7 @@ PHP + MySQL (or SQLite) site with an admin panel. Requires PHP 8.0+ with PDO.
 - Existing installs upgrade their database automatically on the first page load after uploading the new files.
 
 ## Hotel page (hotels.php)
-- Hero with hotel switcher pills, sticky section menu, room cards, amenities, gallery (lightbox), map and "more hotels".
+- `hotels.php` shows the hotel list first (search + star + area filters); clicking a hotel opens `hotels.php?h=ID`: hero with back link, sticky section menu, room cards, amenities, gallery (lightbox), map and "more hotels".
 - Clicking a room card opens a popup showing **only that room** (photos, bed, persons, AC, breakfast, price, WhatsApp/call). Links like `hotels.php?h=4&room=14` open the popup directly.
 - Hotels have a photo gallery (first photo = cover) and rooms: Single Bed, Couple Bed, Family Room or Other (custom name), each with its own photos and per-night price. Owners and admin manage them; owners' changes (including photos and rooms) go live only after admin approval.
 - Uploaded photos wider than 1600px are downscaled automatically (needs PHP GD). Keep `upload_max_filesize` / `post_max_size` high enough for several photos per submit (check Admin → সিস্টেম ইনফরমেশন).
