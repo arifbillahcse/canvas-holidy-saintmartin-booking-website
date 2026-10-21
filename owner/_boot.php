@@ -4,6 +4,13 @@ require APP_ROOT . '/includes/helpers.php';
 require_once APP_ROOT . '/includes/schema.php';
 session_boot();
 
+// Fields an owner may edit on a hotel (rating, badge, featured and ordering are admin-only).
+function owner_fields(): array
+{
+    $all = crud_defs()['hotels']['fields'];
+    return array_intersect_key($all, array_flip(['image', 'name', 'location', 'stars', 'price', 'summary', 'amenities']));
+}
+
 // Logged-in owner row or null. Re-checked on every request so suspensions apply immediately.
 function owner_current(): ?array
 {

@@ -1,59 +1,96 @@
 <?php
-// Hotel editor fields shared by the owner panel and the admin: hotel info + any number of posts.
-// $hotel: ['name','location','summary','posts'=>[...]] ; $assetPrefix: path from the page to the site root.
+// Shared hotel editor fields (hotel info, gallery, rooms). Used by the owner panel and the admin.
+// Expects a snapshot (see includes/hotels.php). $assetPrefix is the path from the page to the site root.
 require_once __DIR__ . '/hotels.php';
 
-function hotel_post_block($i, array $p, string $assetPrefix): string
+function hotel_room_block($i, array $r, string $assetPrefix): string
 {
-    $p += ['id' => 0, 'title' => '', 'body' => '', 'price' => '', 'images' => []];
+    $r += ['id' => 0, 'type' => 'single', 'name' => '', 'price' => '', 'persons' => '', 'beds' => '', 'ac' => 1, 'breakfast' => 0, 'description' => '', 'images' => []];
     ob_start(); ?>
-<fieldset class="post-block">
-  <legend>পোস্ট</legend>
-  <input type="hidden" name="posts[<?= e($i) ?>][id]" value="<?= (int)$p['id'] ?>">
-  <label>শিরোনাম (যেমন: Couple Bed Room)<input name="posts[<?= e($i) ?>][title]" value="<?= e($p['title']) ?>" maxlength="255"></label>
-  <label>লেখা / বিবরণ<textarea name="posts[<?= e($i) ?>][body]" rows="4" placeholder="কয়জন থাকতে পারবে, বেড, এসি, সুবিধা…"><?= e($p['body']) ?></textarea></label>
-  <label>দাম (যেমন: ৳ ২,৫০০ / রাত)<input name="posts[<?= e($i) ?>][price]" value="<?= e($p['price']) ?>" maxlength="80"></label>
-  <div>
-    <b>ছবি</b> <small>(সর্বোচ্চ <?= bn_digits(MAX_POST_IMAGES) ?>টি; ৩-৪টি দিলে সবচেয়ে সুন্দর দেখায়)</small>
-    <?php if ($p['images']): ?><div class="thumbs"><?php foreach ($p['images'] as $img): ?>
-      <label class="th"><img src="<?= e($assetPrefix . $img) ?>" alt=""><span class="chk"><input type="checkbox" name="posts[<?= e($i) ?>][img_remove][]" value="<?= e($img) ?>"> মুছুন</span></label>
-    <?php endforeach; ?></div><?php endif; ?>
-    <input type="file" name="post_images[<?= e($i) ?>][]" accept="image/*" multiple>
+<fieldset class="room-block">
+  <legend>রুম</legend>
+  <input type="hidden" name="rooms[<?= e($i) ?>][id]" value="<?= (int)$r['id'] ?>">
+  <div class="two-col">
+    <label>রুমের ধরন
+      <select name="rooms[<?= e($i) ?>][type]">
+        <?php foreach (ROOM_TYPES as $k => [$lbl]): ?><option value="<?= e($k) ?>" <?= $r['type'] === $k ? 'selected' : '' ?>><?= e($k === 'other' ? 'Other (নিজের নাম দিন)' : $lbl) ?></option><?php endforeach; ?>
+      </select>
+    </label>
+    <label>নাম (Other হলে আবশ্যক, যেমন: Budget Room)<input name="rooms[<?= e($i) ?>][name]" value="<?= e($r['name']) ?>" maxlength="120"></label>
+    <label>প্রতি রাতের ভাড়া (৳, শুধু সংখ্যা)<input name="rooms[<?= e($i) ?>][price]" value="<?= e($r['price'] ? $r['price'] : '') ?>" inputmode="numeric" placeholder="2500"></label>
+    <label>কয়জন থাকতে পারবে<input name="rooms[<?= e($i) ?>][persons]" value="<?= e($r['persons']) ?>" placeholder="২ জন"></label>
+    <label>বেড<input name="rooms[<?= e($i) ?>][beds]" value="<?= e($r['beds']) ?>" placeholder="১টি কুইন বেড"></label>
+    <label>এসি / নন-এসি
+      <select name="rooms[<?= e($i) ?>][ac]"><option value="1" <?= $r['ac'] ? 'selected' : '' ?>>এসি</option><option value="0" <?= !$r['ac'] ? 'selected' : '' ?>>নন-এসি</option></select>
+    </label>
   </div>
-  <button type="button" class="sm danger" data-remove-post>✕ এই পোস্ট মুছুন</button>
+  <label class="chk"><input type="checkbox" name="rooms[<?= e($i) ?>][breakfast]" value="1" <?= $r['breakfast'] ? 'checked' : '' ?>> নাস্তা ফ্রি</label>
+  <label>বিবরণ<textarea name="rooms[<?= e($i) ?>][description]" rows="2"><?= e($r['description']) ?></textarea></label>
+  <div>
+    <b>রুমের ছবি</b> <small>(প্রতি রুমে সর্বোচ্চ <?= bn_digits(MAX_ROOM_IMAGES) ?>টি, প্রথমটি কভার)</small>
+    <?php if ($r['images']): ?><div class="thumbs"><?php foreach ($r['images'] as $img): ?>
+      <label class="th"><img src="<?= e($assetPrefix . $img) ?>" alt=""><span class="chk"><input type="checkbox" name="rooms[<?= e($i) ?>][img_remove][]" value="<?= e($img) ?>"> মুছুন</span></label>
+    <?php endforeach; ?></div><?php endif; ?>
+    <input type="file" name="room_images[<?= e($i) ?>][]" accept="image/*" multiple>
+  </div>
+  <button type="button" class="sm danger" data-remove-room>✕ এই রুম মুছুন</button>
 </fieldset>
 <?php
     return ob_get_clean();
 }
 
-function hotel_form_fields(array $hotel, string $assetPrefix): void
+function hotel_form_fields(array $snap, bool $admin, string $assetPrefix): void
 {
-    $hotel += ['name' => '', 'location' => '', 'summary' => '', 'posts' => []];
+    $f = $snap['fields'] + ['name' => '', 'location' => '', 'stars' => 3, 'summary' => '', 'amenities' => '', 'rating' => '', 'badge' => '', 'featured' => 0];
     ?>
 <fieldset><legend>হোটেলের তথ্য</legend>
-  <label>হোটেলের নাম<input name="name" value="<?= e($hotel['name']) ?>" required maxlength="255"></label>
-  <label>এলাকা/লোকেশন (যেমন: সেন্ট মার্টিন, জেটি ঘাট)<input name="location" value="<?= e($hotel['location']) ?>" maxlength="255"></label>
-  <label>সংক্ষিপ্ত পরিচিতি (ঐচ্ছিক)<textarea name="summary" rows="3"><?= e($hotel['summary']) ?></textarea></label>
+  <label>হোটেলের নাম<input name="name" value="<?= e($f['name']) ?>" required maxlength="255"></label>
+  <label>এলাকা/লোকেশন (যেমন: সেন্ট মার্টিন, জেটি ঘাট)<input name="location" value="<?= e($f['location']) ?>" maxlength="255"></label>
+  <label>স্টার (১-৫)<input type="number" min="1" max="5" name="stars" value="<?= (int)$f['stars'] ?>"></label>
+  <label>সংক্ষিপ্ত বিবরণ<textarea name="summary" rows="4"><?= e($f['summary']) ?></textarea></label>
+  <label>সুযোগ-সুবিধা (প্রতি লাইনে একটি; যেমন: ফ্রি ওয়াইফাই, সী-ভিউ, নাস্তা ফ্রি)<textarea name="amenities" rows="5"><?= e($f['amenities']) ?></textarea></label>
+  <?php if ($admin): ?>
+  <div class="two-col">
+    <label>রেটিং (যেমন: ৪.৮)<input name="rating" value="<?= e($f['rating']) ?>" maxlength="40"></label>
+    <label>ব্যাজ (যেমন: সী-ভিউ)<input name="badge" value="<?= e($f['badge']) ?>" maxlength="60"></label>
+  </div>
+  <label class="chk"><input type="checkbox" name="featured" value="1" <?= $f['featured'] ? 'checked' : '' ?>> হোমপেজে দেখান</label>
+  <?php endif; ?>
 </fieldset>
 
-<fieldset><legend>পোস্টসমূহ (ছবি + লেখা + দাম)</legend>
-  <small>যত খুশি পোস্ট দিন। প্রতিটি পোস্ট হোটেলের পেজে একটি আলাদা ব্লক হিসেবে দেখাবে (উপর থেকে নিচে এই ক্রমে)।</small>
-  <div id="posts"><?php foreach (array_values($hotel['posts']) as $i => $p) { echo hotel_post_block($i, $p, $assetPrefix); } ?></div>
-  <template id="postTpl"><?= hotel_post_block('__I__', [], $assetPrefix) ?></template>
-  <button type="button" class="sm" id="addPost">+ নতুন পোস্ট যোগ করুন</button>
+<fieldset><legend>হোটেলের গ্যালারি ছবি</legend>
+  <small>সর্বোচ্চ <?= bn_digits(MAX_GALLERY) ?>টি ছবি। প্রথম ছবিটি কভার/হিরো ছবি হিসেবে দেখাবে। প্রতিটি ২ MB পর্যন্ত (JPG/PNG/WebP)।</small>
+  <?php if ($snap['gallery']): ?><div class="thumbs"><?php foreach ($snap['gallery'] as $img): ?>
+    <label class="th"><img src="<?= e($assetPrefix . $img) ?>" alt=""><span class="chk"><input type="checkbox" name="gallery_remove[]" value="<?= e($img) ?>"> মুছুন</span></label>
+  <?php endforeach; ?></div><?php endif; ?>
+  <input type="file" name="gallery[]" accept="image/*" multiple>
+</fieldset>
+
+<fieldset><legend>রুমের ধরন, ছবি ও ভাড়া</legend>
+  <?php if (!$snap['rooms']): ?><p class="hint">স্যাম্পল রুম দেওয়া আছে (ধরন, ভাড়া ও তথ্য নমুনা মাত্র)। আপনার হোটেল অনুযায়ী ভাড়া/তথ্য বদলান, ছবি দিন, যে রুম নেই সেটি "✕ মুছুন" করুন, আর দরকারে "+ রুম যোগ করুন" দিয়ে আরও রুম যোগ করুন।</p><?php endif; ?>
+  <div id="rooms"><?php
+    // A hotel without rooms starts with editable sample rooms.
+    $rows = $snap['rooms'] ?: sample_rooms();
+    $max = -1;
+    foreach (array_values($rows) as $i => $r) {
+        echo hotel_room_block($i, $r, $assetPrefix);
+        $max = $i;
+    } ?></div>
+  <template id="roomTpl"><?= hotel_room_block('__I__', ['ac' => 1], $assetPrefix) ?></template>
+  <button type="button" class="sm" id="addRoom">+ রুম যোগ করুন</button>
 </fieldset>
 <script>
 (function () {
-  var wrap = document.getElementById('posts'), tpl = document.getElementById('postTpl'), n = <?= count($hotel['posts']) ?>;
+  var wrap = document.getElementById('rooms'), tpl = document.getElementById('roomTpl'), n = <?= $max + 1 ?>;
   function add() {
     var d = document.createElement('div');
     d.innerHTML = tpl.innerHTML.replace(/__I__/g, n++);
     wrap.appendChild(d.firstElementChild);
   }
-  document.getElementById('addPost').addEventListener('click', add);
+  document.getElementById('addRoom').addEventListener('click', add);
   wrap.addEventListener('click', function (e) {
-    var b = e.target.closest('[data-remove-post]');
-    if (b && confirm('এই পোস্টটি মুছে ফেলবেন?')) b.closest('.post-block').remove();
+    var b = e.target.closest('[data-remove-room]');
+    if (b && confirm('এই রুমটি মুছে ফেলবেন?')) b.closest('.room-block').remove();
   });
   if (!wrap.children.length) add();
 })();
