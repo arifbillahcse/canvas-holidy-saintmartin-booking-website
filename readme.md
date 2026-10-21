@@ -25,3 +25,9 @@ PHP + MySQL (or SQLite) site with an admin panel. Requires PHP 8.0+ with PDO.
 - Hotel inquiries always go to the company WhatsApp/phone from Site Settings, never to the owner.
 - Suspending an owner takes their hotels offline; deleting an owner removes their hotels and images.
 - Existing installs upgrade their database automatically on the first page load after uploading the new files.
+
+## Hotel page (hotels.php)
+- Hero with hotel switcher pills, sticky section menu, room cards, amenities, gallery (lightbox), map and "more hotels".
+- Clicking a room card opens a popup showing **only that room** (photos, bed, persons, AC, breakfast, price, WhatsApp/call). Links like `hotels.php?h=4&room=14` open the popup directly.
+- Hotels have a photo gallery (first photo = cover) and rooms: Single Bed, Couple Bed, Family Room or Other (custom name), each with its own photos and per-night price. Owners and admin manage them; owners' changes (including photos and rooms) go live only after admin approval.
+- Uploaded photos wider than 1600px are downscaled automatically (needs PHP GD). Keep `upload_max_filesize` / `post_max_size` high enough for several photos per submit (check Admin → সিস্টেম ইনফরমেশন).

@@ -1,6 +1,7 @@
 <?php
 require __DIR__ . '/_boot.php';
 require __DIR__ . '/_layout.php';
+require_once APP_ROOT . '/includes/hotels.php';
 admin_require();
 $pdo = db();
 $labels = ['pending' => 'অপেক্ষায়', 'active' => 'সক্রিয়', 'suspended' => 'স্থগিত'];
@@ -20,18 +21,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
         flash('আপডেট হয়েছে।');
     } elseif ($act === 'delete') {
-        $st = $pdo->prepare('SELECT * FROM hotels WHERE owner_id = ?');
+        $st = $pdo->prepare('SELECT id FROM hotels WHERE owner_id = ?');
         $st->execute([$id]);
-        foreach ($st->fetchAll() as $h) {
-            if ($h['image']) {
-                delete_upload($h['image']);
-            }
-            $pd = json_decode((string)$h['pending_data'], true);
-            if (!empty($pd['image']) && $pd['image'] !== $h['image']) {
-                delete_upload($pd['image']);
-            }
+        foreach ($st->fetchAll(PDO::FETCH_COLUMN) as $hid) {
+            hotel_delete((int)$hid);
         }
-        $pdo->prepare('DELETE FROM hotels WHERE owner_id = ?')->execute([$id]);
         $pdo->prepare('DELETE FROM owners WHERE id = ?')->execute([$id]);
         flash('মালিক ও তার সব হোটেল মুছে ফেলা হয়েছে।');
     }

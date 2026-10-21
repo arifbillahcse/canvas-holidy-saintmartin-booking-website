@@ -205,3 +205,129 @@
   }
   [q, st, loc].forEach(function (el) { if (el) el.addEventListener('input', apply); });
 })();
+
+/* ===== Hotel detail: room popup, gallery lightbox, section highlight ===== */
+(function () {
+  var dataEl = document.getElementById('roomData');
+  if (!dataEl) return;
+  var data = JSON.parse(dataEl.textContent);
+  var rooms = data.rooms, gallery = data.gallery;
+
+  /* --- Room popup (shows only the clicked room) --- */
+  var modal = document.getElementById('roomModal');
+  var big = document.getElementById('rmBig'), thumbs = document.getElementById('rmThumbs');
+  var lastFocus = null;
+
+  function bg(node, path) { node.style.backgroundImage = path ? 'url("' + path + '")' : ''; }
+  function row(dl, k, v) {
+    var d = document.createElement('div'), dt = document.createElement('dt'), dd = document.createElement('dd');
+    dt.textContent = k; dd.textContent = v; d.appendChild(dt); d.appendChild(dd); dl.appendChild(d);
+  }
+  function setPhoto(r, i) {
+    bg(big, r.images[i] || '');
+    big.textContent = r.images.length ? '' : r.icon;
+    Array.prototype.forEach.call(thumbs.children, function (b, n) { b.classList.toggle('on', n === i); });
+  }
+  function setUrl(id) {
+    try {
+      var u = new URL(window.location.href);
+      if (id) u.searchParams.set('room', id); else u.searchParams.delete('room');
+      history.replaceState(null, '', u.toString());
+    } catch (e) {}
+  }
+  function openRoom(id) {
+    var r = rooms.filter(function (x) { return x.id === id; })[0];
+    if (!r) return;
+    lastFocus = document.activeElement;
+    document.getElementById('rmTitle').textContent = r.label;
+    document.getElementById('rmCrumb').textContent = r.label;
+    document.getElementById('rmDesc').textContent = r.description;
+    document.getElementById('rmPrice').textContent = r.hasPrice ? '৳ ' + r.price : 'কল করুন';
+    var spec = document.getElementById('rmSpec');
+    spec.textContent = '';
+    if (r.persons) row(spec, '👥 থাকতে পারবে', r.persons);
+    if (r.beds) row(spec, '🛏️ বেড', r.beds);
+    row(spec, '❄️ এসি / নন-এসি', r.ac ? 'এসি' : 'নন-এসি');
+    row(spec, '🍳 নাস্তা', r.breakfast ? 'ফ্রি' : 'অন্তর্ভুক্ত নয়');
+    thumbs.textContent = '';
+    if (r.images.length > 1) {
+      r.images.forEach(function (p, i) {
+        var b = document.createElement('button');
+        b.type = 'button'; bg(b, p); b.setAttribute('aria-label', 'ছবি ' + (i + 1));
+        b.addEventListener('click', function () { setPhoto(r, i); });
+        thumbs.appendChild(b);
+      });
+    }
+    setPhoto(r, 0);
+    var msg = 'আসসালামু আলাইকুম, ' + modal.getAttribute('data-brand') + '।\nআমি "' + modal.getAttribute('data-hotel') +
+      '" হোটেলের "' + r.label + '" রুমের ব্যাপারে জানতে চাই।';
+    document.getElementById('rmWa').href = 'https://wa.me/' + modal.getAttribute('data-wa') + '?text=' + encodeURIComponent(msg);
+    modal.hidden = false;
+    document.body.classList.add('rm-open');
+    modal.querySelector('.rm__x').focus();
+    setUrl(id);
+  }
+  function closeRoom() {
+    if (modal.hidden) return;
+    modal.hidden = true;
+    document.body.classList.remove('rm-open');
+    setUrl(null);
+    if (lastFocus && lastFocus.focus) lastFocus.focus();
+  }
+  Array.prototype.forEach.call(document.querySelectorAll('.rcard'), function (c) {
+    var id = parseInt(c.getAttribute('data-room'), 10);
+    c.addEventListener('click', function () { openRoom(id); });
+    c.addEventListener('keydown', function (e) {
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openRoom(id); }
+    });
+  });
+  Array.prototype.forEach.call(modal.querySelectorAll('[data-close]'), function (b) { b.addEventListener('click', closeRoom); });
+  var want = parseInt(new URLSearchParams(window.location.search).get('room'), 10);
+  if (want) openRoom(want);
+
+  /* --- Gallery lightbox --- */
+  var lb = document.getElementById('lightbox'), lbImg = document.getElementById('lbImg'), cur = 0;
+  function showLb(i) {
+    cur = (i + gallery.length) % gallery.length;
+    lbImg.src = gallery[cur];
+  }
+  function openLb(i) { lb.hidden = false; document.body.classList.add('rm-open'); showLb(i); }
+  function closeLb() { lb.hidden = true; if (modal.hidden) document.body.classList.remove('rm-open'); }
+  Array.prototype.forEach.call(document.querySelectorAll('[data-lightbox]'), function (b) {
+    b.addEventListener('click', function () { openLb(parseInt(b.getAttribute('data-lightbox'), 10)); });
+  });
+  lb.querySelector('[data-lbclose]').addEventListener('click', closeLb);
+  lb.querySelector('[data-lbprev]').addEventListener('click', function () { showLb(cur - 1); });
+  lb.querySelector('[data-lbnext]').addEventListener('click', function () { showLb(cur + 1); });
+  lb.addEventListener('click', function (e) { if (e.target === lb) closeLb(); });
+
+  document.addEventListener('keydown', function (e) {
+    if (!lb.hidden) {
+      if (e.key === 'Escape') closeLb();
+      else if (e.key === 'ArrowLeft') showLb(cur - 1);
+      else if (e.key === 'ArrowRight') showLb(cur + 1);
+    } else if (!modal.hidden) {
+      if (e.key === 'Escape') closeRoom();
+      else if (e.key === 'Tab') { // keep focus inside the popup
+        var f = modal.querySelectorAll('button, a[href]');
+        if (!f.length) return;
+        var first = f[0], last = f[f.length - 1];
+        if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+        else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+      }
+    }
+  });
+
+  /* --- Highlight the section menu item while scrolling --- */
+  var links = Array.prototype.slice.call(document.querySelectorAll('.snav__in > a[href^="#"]'));
+  function spy() {
+    var active = links[0];
+    links.forEach(function (a) {
+      var s = document.querySelector(a.getAttribute('href'));
+      if (s && s.getBoundingClientRect().top < 170) active = a;
+    });
+    links.forEach(function (a) { a.classList.toggle('on', a === active); });
+  }
+  window.addEventListener('scroll', spy, { passive: true });
+  spy();
+})();

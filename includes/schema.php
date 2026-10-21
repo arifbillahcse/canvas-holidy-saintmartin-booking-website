@@ -1,5 +1,5 @@
 <?php
-const SCHEMA_VERSION = '3';
+const SCHEMA_VERSION = '4';
 
 // Table definitions + CRUD field definitions for the admin panel.
 
@@ -19,6 +19,9 @@ function schema_sql(string $driver): array
     $sql[] = "CREATE TABLE IF NOT EXISTS packages (id $id, sort_order INT NOT NULL DEFAULT 0, active TINYINT NOT NULL DEFAULT 1, icon $str, name $str NOT NULL, summary $str, features TEXT, badge $str, hot TINYINT NOT NULL DEFAULT 0)$tail";
     $sql[] = "CREATE TABLE IF NOT EXISTS hotels (id $id, sort_order INT NOT NULL DEFAULT 0, active TINYINT NOT NULL DEFAULT 1, image $str NOT NULL DEFAULT '', name $str NOT NULL, location $str NOT NULL DEFAULT '', stars INT NOT NULL DEFAULT 3, rating $str NOT NULL DEFAULT '', price $str NOT NULL DEFAULT '', summary TEXT, amenities TEXT, badge $str NOT NULL DEFAULT '', featured TINYINT NOT NULL DEFAULT 0, owner_id INT NULL, status VARCHAR(16) NOT NULL DEFAULT 'approved', reject_reason $str NOT NULL DEFAULT '', pending_data TEXT)$tail";
     $sql[] = "CREATE TABLE IF NOT EXISTS owners (id $id, name $str NOT NULL, email $str NOT NULL UNIQUE, phone VARCHAR(32) NOT NULL, password_hash $str NOT NULL, status VARCHAR(16) NOT NULL DEFAULT 'pending', created_at $now)$tail";
+    $sql[] = "CREATE TABLE IF NOT EXISTS hotel_images (id $id, hotel_id INT NOT NULL, path $str NOT NULL, sort_order INT NOT NULL DEFAULT 0)$tail";
+    $sql[] = "CREATE TABLE IF NOT EXISTS rooms (id $id, hotel_id INT NOT NULL, sort_order INT NOT NULL DEFAULT 0, type VARCHAR(16) NOT NULL DEFAULT 'other', name $str NOT NULL DEFAULT '', price INT NOT NULL DEFAULT 0, persons $str NOT NULL DEFAULT '', beds $str NOT NULL DEFAULT '', ac TINYINT NOT NULL DEFAULT 1, breakfast TINYINT NOT NULL DEFAULT 0, description TEXT)$tail";
+    $sql[] = "CREATE TABLE IF NOT EXISTS room_images (id $id, room_id INT NOT NULL, path $str NOT NULL, sort_order INT NOT NULL DEFAULT 0)$tail";
     $sql[] = "CREATE TABLE IF NOT EXISTS whys (id $id, sort_order INT NOT NULL DEFAULT 0, active TINYINT NOT NULL DEFAULT 1, icon $str, title $str NOT NULL, body TEXT)$tail";
     $sql[] = "CREATE TABLE IF NOT EXISTS steps (id $id, sort_order INT NOT NULL DEFAULT 0, active TINYINT NOT NULL DEFAULT 1, title $str NOT NULL, body TEXT)$tail";
     $sql[] = "CREATE TABLE IF NOT EXISTS faqs (id $id, sort_order INT NOT NULL DEFAULT 0, active TINYINT NOT NULL DEFAULT 1, question $str NOT NULL, answer TEXT)$tail";

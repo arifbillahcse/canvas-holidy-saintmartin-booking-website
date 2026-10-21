@@ -1,5 +1,6 @@
 <?php
 require_once __DIR__ . '/db.php';
+require_once __DIR__ . '/schema.php';
 
 function e($v): string
 {
@@ -8,7 +9,8 @@ function e($v): string
 
 function bn_digits($n): string
 {
-    return strtr((string)$n, '0123456789', '০১২৩৪৫৬৭৮৯');
+    // Array form: strtr() with two strings maps single bytes and would corrupt multibyte digits.
+    return strtr((string)$n, ['0' => '০', '1' => '১', '2' => '২', '3' => '৩', '4' => '৪', '5' => '৫', '6' => '৬', '7' => '৭', '8' => '৮', '9' => '৯']);
 }
 
 /* ---------- Settings ---------- */
@@ -20,9 +22,9 @@ function settings_all(): array
         foreach (db()->query('SELECT k, v FROM settings') as $r) {
             $cache[$r['k']] = $r['v'];
         }
-        if (($cache['schema_v'] ?? '') !== '3') {
+        if (($cache['schema_v'] ?? '') !== SCHEMA_VERSION) {
             ensure_schema();
-            $cache['schema_v'] = '3';
+            $cache['schema_v'] = SCHEMA_VERSION;
         }
     }
     return $cache;
@@ -206,6 +208,7 @@ function save_image_upload(array $file, array $exts = ['png', 'jpg', 'jpeg', 'we
     if (!move_uploaded_file($file['tmp_name'], $dir . '/' . $name)) {
         throw new RuntimeException('ফাইল সংরক্ষণ করা যায়নি।');
     }
+    resize_image($dir . '/' . $name);
     return 'uploads/' . $name;
 }
 
@@ -213,5 +216,32 @@ function delete_upload(string $rel): void
 {
     if (preg_match('#^uploads/img_[a-f0-9]+\.[a-z]+$#', $rel)) {
         @unlink(APP_ROOT . '/' . $rel);
+    }
+}
+
+// Downscale very large photos (max 1600px wide) so pages stay light. Needs GD; silently skipped otherwise.
+function resize_image(string $path, int $max = 1600): void
+{
+    $info = @getimagesize($path);
+    if (!$info || $info[0] <= $max || !function_exists('imagescale')) {
+        return;
+    }
+    $type = $info[2];
+    $img = $type === IMAGETYPE_JPEG && function_exists('imagecreatefromjpeg') ? @imagecreatefromjpeg($path)
+        : ($type === IMAGETYPE_PNG && function_exists('imagecreatefrompng') ? @imagecreatefrompng($path)
+        : ($type === IMAGETYPE_WEBP && function_exists('imagecreatefromwebp') ? @imagecreatefromwebp($path) : false));
+    if (!$img) {
+        return;
+    }
+    $small = imagescale($img, $max);
+    if ($small) {
+        if ($type === IMAGETYPE_PNG) {
+            imagesavealpha($small, true);
+            imagepng($small, $path, 6);
+        } elseif ($type === IMAGETYPE_WEBP) {
+            imagewebp($small, $path, 82);
+        } else {
+            imagejpeg($small, $path, 85);
+        }
     }
 }

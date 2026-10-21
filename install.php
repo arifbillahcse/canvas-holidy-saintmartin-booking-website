@@ -1,7 +1,7 @@
 <?php
 // One-time installer. Delete this file after installation.
 define('APP_ROOT', __DIR__);
-require __DIR__ . '/includes/schema.php';
+require_once __DIR__ . '/includes/schema.php';
 require __DIR__ . '/includes/seed.php';
 require __DIR__ . '/includes/helpers.php';
 

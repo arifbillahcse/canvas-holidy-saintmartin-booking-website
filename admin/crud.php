@@ -10,6 +10,13 @@ if (!isset($defs[$t])) {
     exit('Not found');
 }
 $def = $defs[$t]; // $t is whitelisted, safe to interpolate as table name
+if ($t === 'hotels') {
+    require_once APP_ROOT . '/includes/hotels.php';
+    if (isset($_GET['edit'])) {
+        header('Location: hotel_edit.php' . ($_GET['edit'] === 'new' ? '' : '?id=' . (int)$_GET['edit']));
+        exit;
+    }
+}
 $pdo = db();
 $self = 'crud.php?t=' . urlencode($t);
 
@@ -21,7 +28,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         header("Location: $self");
         exit;
     }
-    if ($act === 'delete' && $id) {
+    if ($act === 'delete' && $id && $t === 'hotels') {
+        hotel_delete($id);
+        flash('মুছে ফেলা হয়েছে।');
+    } elseif ($act === 'delete' && $id) {
         foreach ($def['fields'] as $col => $f) {
             if ($f[1] === 'image') {
                 $o = $pdo->prepare("SELECT $col FROM $t WHERE id = ?");

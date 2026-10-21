@@ -1,6 +1,7 @@
 <?php
 require __DIR__ . '/_boot.php';
 require __DIR__ . '/_layout.php';
+require_once APP_ROOT . '/includes/hotels.php';
 $owner = owner_require();
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['act'] ?? '') === 'delete') {
@@ -9,14 +10,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['act'] ?? '') === 'delete')
         $st = db()->prepare('SELECT * FROM hotels WHERE id = ? AND owner_id = ?');
         $st->execute([$id, $owner['id']]);
         if ($h = $st->fetch()) {
-            if ($h['image']) {
-                delete_upload($h['image']);
-            }
-            $pd = json_decode((string)$h['pending_data'], true);
-            if (!empty($pd['image']) && $pd['image'] !== $h['image']) {
-                delete_upload($pd['image']);
-            }
-            db()->prepare('DELETE FROM hotels WHERE id = ? AND owner_id = ?')->execute([$id, $owner['id']]);
+            hotel_delete((int)$h['id']);
             flash('হোটেল মুছে ফেলা হয়েছে।');
         }
     }

@@ -64,6 +64,18 @@ function seed_defaults(PDO $pdo): void
         ['image' => '', 'name' => 'হোটেলের নাম ২', 'location' => 'সেন্ট মার্টিন', 'stars' => 3, 'rating' => '৪.২/৫', 'price' => '০,০০০', 'summary' => 'পরিবার ও বন্ধুদের জন্য বাজেট-ফ্রেন্ডলি রুম।', 'amenities' => "এসি/নন-এসি রুম\nনাস্তা\nজেনারেটর ব্যাকআপ", 'badge' => 'জনপ্রিয়', 'featured' => 1],
         ['image' => '', 'name' => 'হোটেলের নাম ৩', 'location' => 'সেন্ট মার্টিন', 'stars' => 5, 'rating' => '৪.৮/৫', 'price' => '০,০০০', 'summary' => 'প্রাইভেট বিচ ও প্রিমিয়াম সার্ভিসসহ রিসোর্ট।', 'amenities' => "প্রাইভেট বিচ\nরেস্টুরেন্ট\nএসি স্যুট\nওয়াইফাই", 'badge' => 'প্রিমিয়াম', 'featured' => 1],
     ]);
+    $roomSets = [
+        ['single', '', 1200, '১ জন', '১টি সিঙ্গেল বেড', 0, 0, 'ছোট ও আরামদায়ক রুম, একজনের জন্য আদর্শ।'],
+        ['couple', '', 2500, '২ জন', '১টি কুইন বেড', 1, 1, 'কুইন সাইজ বেড, এসি ও এটাচড বাথ।'],
+        ['family', '', 4000, '৪ জন', '২টি বেড', 1, 1, 'পরিবারের জন্য প্রশস্ত রুম।'],
+        ['other', 'Budget Room', 800, '২ জন', 'সাধারণ বেড', 0, 0, 'বাজেট-ফ্রেন্ডলি রুম।'],
+    ];
+    foreach ($pdo->query('SELECT id FROM hotels ORDER BY id')->fetchAll(PDO::FETCH_COLUMN) as $hid) {
+        foreach ($roomSets as $i => [$type, $nm, $pr, $pe, $be, $ac, $bf, $ds]) {
+            $pdo->prepare('INSERT INTO rooms (hotel_id, sort_order, type, name, price, persons, beds, ac, breakfast, description) VALUES (?,?,?,?,?,?,?,?,?,?)')
+                ->execute([$hid, $i, $type, $nm, $pr, $pe, $be, $ac, $bf, $ds]);
+        }
+    }
     $ins('packages', [
         ['icon' => '⛺', 'name' => 'বাজেট স্টে', 'summary' => 'টিকেট + সাধারণ রুমে ১ রাত', 'features' => "সীপ টিকেট (আসা-যাওয়া)\n১ রাত থাকা\nসকালের নাস্তা", 'badge' => '', 'hot' => 0],
         ['icon' => '🏖️', 'name' => 'কমফোর্ট স্টে', 'summary' => 'টিকেট + এসি রুমে ১ রাত', 'features' => "সীপ টিকেট (আসা-যাওয়া)\nএসি রুম\nনাস্তা ও ডিনার", 'badge' => 'জনপ্রিয়', 'hot' => 1],

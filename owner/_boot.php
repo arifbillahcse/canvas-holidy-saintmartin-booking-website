@@ -1,7 +1,7 @@
 <?php
 define('APP_ROOT', dirname(__DIR__));
 require APP_ROOT . '/includes/helpers.php';
-require APP_ROOT . '/includes/schema.php';
+require_once APP_ROOT . '/includes/schema.php';
 session_boot();
 
 // Fields an owner may edit on a hotel (rating, badge, featured and ordering are admin-only).
