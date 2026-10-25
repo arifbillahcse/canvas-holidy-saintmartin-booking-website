@@ -51,6 +51,12 @@ function ensure_schema(): void
     }
 }
 
+// Admin on/off switch: when on, new owner accounts and owners' hotels/edits need admin approval.
+function owner_approval_on(): bool
+{
+    return setting('owner_approval', '0') === '1';
+}
+
 function setting(string $key, string $default = ''): string
 {
     $s = settings_all();

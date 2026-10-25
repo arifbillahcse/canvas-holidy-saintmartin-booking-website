@@ -34,12 +34,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         header("Location: $back");
         exit;
     }
+    $approval = owner_approval_on();
     if (!$hotel) {
         $order = (int)$pdo->query('SELECT COALESCE(MAX(sort_order),0)+1 FROM hotels')->fetchColumn();
-        $pdo->prepare("INSERT INTO hotels (name, owner_id, status, active, sort_order) VALUES (?, ?, 'pending', 1, ?)")
-            ->execute([$snap['fields']['name'], $owner['id'], $order]);
+        $pdo->prepare('INSERT INTO hotels (name, owner_id, status, active, sort_order) VALUES (?, ?, ?, 1, ?)')
+            ->execute([$snap['fields']['name'], $owner['id'], $approval ? 'pending' : 'approved', $order]);
         hotel_apply((int)$pdo->lastInsertId(), $snap);
-        flash('হোটেল জমা হয়েছে। অ্যাডমিন অনুমোদন করলে সাইটে দেখা যাবে।');
+        flash($approval ? 'হোটেল জমা হয়েছে। অ্যাডমিন অনুমোদন করলে সাইটে দেখা যাবে।' : 'হোটেল যোগ হয়েছে এবং সাইটে লাইভ।');
+    } elseif (!$approval) {
+        // Approval is off: changes go live at once; drop any edit staged while approval was on.
+        hotel_apply($id, $snap);
+        delete_paths(array_diff(snapshot_paths($pending), snapshot_paths($live), snapshot_paths($snap)));
+        $pdo->prepare("UPDATE hotels SET status = 'approved', pending_data = NULL, reject_reason = '' WHERE id = ? AND owner_id = ?")->execute([$id, $owner['id']]);
+        flash('সংরক্ষিত হয়েছে এবং সাইটে লাইভ।');
     } elseif ($hotel['status'] === 'approved') {
         // Live hotel: stage the whole edit; live data stays untouched until the admin approves.
         $pdo->prepare("UPDATE hotels SET pending_data = ?, reject_reason = '' WHERE id = ? AND owner_id = ?")

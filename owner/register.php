@@ -35,8 +35,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if ($has->fetch()) {
             $err = 'এই ইমেইল দিয়ে আগেই রেজিস্ট্রেশন করা হয়েছে।';
         } else {
-            db()->prepare("INSERT INTO owners (name, email, phone, password_hash, status) VALUES (?,?,?,?, 'pending')")
-                ->execute([$v['name'], strtolower($v['email']), preg_replace('/[\s-]/', '', $v['phone']), password_hash($pass, PASSWORD_DEFAULT)]);
+            $approval = owner_approval_on();
+            db()->prepare('INSERT INTO owners (name, email, phone, password_hash, status) VALUES (?,?,?,?,?)')
+                ->execute([$v['name'], strtolower($v['email']), preg_replace('/[\s-]/', '', $v['phone']), password_hash($pass, PASSWORD_DEFAULT), $approval ? 'pending' : 'active']);
+            if (!$approval) {
+                // Approval is off: log the new owner straight in.
+                session_regenerate_id(true);
+                $_SESSION['owner_id'] = (int)db()->lastInsertId();
+                flash('রেজিস্ট্রেশন সম্পন্ন! এখন আপনার হোটেল যোগ করুন।');
+                header('Location: index.php');
+                exit;
+            }
             $done = true;
         }
     }
