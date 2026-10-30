@@ -64,8 +64,8 @@ function crud_defs(): array
             'fields' => [
                 'image' => ['সীপ/কেবিনের ছবি (PNG/JPG/WebP, ২MB পর্যন্ত)', 'image'],
                 'tag' => ['টাইপ ট্যাগ (যেমন VIP)', 'text'],
-                'ship_name' => ['সীপের নাম (যেমন: MV Karnafuly Express) — ক্লাসের নামের উপরে বড় করে দেখাবে', 'text'],
-                'name' => ['ক্লাসের নাম (যেমন: Lavender (01 Person))', 'text', true],
+                'ship_name' => ['সীপের নাম (যেমন: MV Karnafuly Express) — শিরোনামের উপরে বড় করে দেখাবে', 'text'],
+                'name' => ['শিরোনাম (যেমন: Lavender (01 Person))', 'text', true],
                 'subtitle' => ['সাব-টাইটেল (যেমন: 1st Floor VIP Seats)', 'text'],
                 'price_round' => ['রাউন্ড ট্রিপ ভাড়া (যেমন ৩,৫০০)', 'text'],
                 'price' => ['সিঙ্গেল ট্রিপ ভাড়া (যেমন ১,৮০০)', 'text'],
