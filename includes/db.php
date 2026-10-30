@@ -22,7 +22,16 @@ function db(): PDO
         $pdo->exec('PRAGMA foreign_keys = ON');
     } else {
         $dsn = 'mysql:host=' . $c['host'] . ';dbname=' . $c['name'] . ';charset=utf8mb4';
-        $pdo = new PDO($dsn, $c['user'], $c['pass']);
+        try {
+            $pdo = new PDO($dsn, $c['user'], $c['pass']);
+        } catch (PDOException $e) {
+            // Never let the exception escape: its stack trace contains the DB password.
+            error_log('Database connection failed: ' . $e->getMessage());
+            http_response_code(503);
+            header('Retry-After: 30');
+            header('Content-Type: text/html; charset=utf-8');
+            exit('<!DOCTYPE html><meta charset="utf-8"><title>সাময়িক সমস্যা</title><p style="font-family:sans-serif;text-align:center;margin-top:20vh">সার্ভারে সাময়িক সমস্যা হচ্ছে। কিছুক্ষণ পরে আবার চেষ্টা করুন।</p>');
+        }
     }
     $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
     $pdo->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);

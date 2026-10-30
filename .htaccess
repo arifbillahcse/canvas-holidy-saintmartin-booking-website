@@ -1,6 +1,6 @@
 DirectoryIndex index.php
 Options -Indexes
-<FilesMatch "^(config\.php|config\.sample\.php|.*\.sqlite|readme\.md)$">
+<FilesMatch "^(config\.php|config\.sample\.php|.*\.sqlite|readme\.md|error_log|.*\.log)$">
   Require all denied
 </FilesMatch>
 # Hide the git repository when the site is deployed with git pull
