@@ -59,7 +59,8 @@ function crud_defs(): array
 {
     return [
         'ships' => [
-            'title' => 'সীপ ও টিকেট', 'label' => 'name',
+            'title' => 'সীপ ও টিকেট', 'label' => 'name', 'label_title' => 'ক্লাসের নাম',
+            'list_cols' => ['ship_name' => 'সীপের নাম'], // extra columns in the admin list
             'fields' => [
                 'image' => ['সীপ/কেবিনের ছবি (PNG/JPG/WebP, ২MB পর্যন্ত)', 'image'],
                 'tag' => ['টাইপ ট্যাগ (যেমন VIP)', 'text'],

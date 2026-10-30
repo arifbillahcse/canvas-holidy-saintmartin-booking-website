@@ -153,10 +153,12 @@ if (isset($_GET['edit'])) {
     ?>
 <p><a class="btn" href="<?= e($self) ?>&edit=new">+ নতুন যোগ করুন</a></p>
 <table class="tbl">
-  <tr><th>#</th><th>শিরোনাম</th><th>অবস্থা</th><th>অ্যাকশন</th></tr>
+  <?php $extra = $def['list_cols'] ?? []; ?>
+  <tr><th>#</th><?php foreach ($extra as $lbl): ?><th><?= e($lbl) ?></th><?php endforeach; ?><th><?= e($def['label_title'] ?? 'শিরোনাম') ?></th><th>অবস্থা</th><th>অ্যাকশন</th></tr>
   <?php foreach ($rows as $i => $r): ?>
   <tr class="<?= $r['active'] ? '' : 'off' ?>">
     <td><?= $i + 1 ?></td>
+    <?php foreach ($extra as $col => $lbl): ?><td><?= ($r[$col] ?? '') !== '' ? '<b>' . e($r[$col]) . '</b>' : '<span style="color:#99a">—</span>' ?></td><?php endforeach; ?>
     <td><?= e($r[$def['label']]) ?></td>
     <td><?= $r['active'] ? 'সক্রিয়' : 'লুকানো' ?></td>
     <td class="acts">
@@ -168,7 +170,7 @@ if (isset($_GET['edit'])) {
     </td>
   </tr>
   <?php endforeach; ?>
-  <?php if (!$rows): ?><tr><td colspan="4">কিছু নেই।</td></tr><?php endif; ?>
+  <?php if (!$rows): ?><tr><td colspan="<?= 4 + count($extra) ?>">কিছু নেই।</td></tr><?php endif; ?>
 </table>
 <?php
 }
