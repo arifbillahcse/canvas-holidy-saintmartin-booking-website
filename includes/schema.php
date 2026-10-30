@@ -1,5 +1,5 @@
 <?php
-const SCHEMA_VERSION = '4';
+const SCHEMA_VERSION = '5';
 
 // Table definitions + CRUD field definitions for the admin panel.
 
@@ -15,7 +15,7 @@ function schema_sql(string $driver): array
     $sql[] = "CREATE TABLE IF NOT EXISTS settings (k $key, v TEXT)$tail";
     $sql[] = "CREATE TABLE IF NOT EXISTS admins (id $id, username $str NOT NULL UNIQUE, password_hash $str NOT NULL, created_at $now)$tail";
     $sql[] = "CREATE TABLE IF NOT EXISTS login_attempts (id $id, ip $str NOT NULL, created_at INT NOT NULL)$tail";
-    $sql[] = "CREATE TABLE IF NOT EXISTS ships (id $id, sort_order INT NOT NULL DEFAULT 0, active TINYINT NOT NULL DEFAULT 1, tag $str, name $str NOT NULL, depart $str, return_time $str, extra $str, price $str, featured TINYINT NOT NULL DEFAULT 0, image $str NOT NULL DEFAULT '', subtitle $str NOT NULL DEFAULT '', price_round $str NOT NULL DEFAULT '', seats $str NOT NULL DEFAULT '', features TEXT)$tail";
+    $sql[] = "CREATE TABLE IF NOT EXISTS ships (id $id, sort_order INT NOT NULL DEFAULT 0, active TINYINT NOT NULL DEFAULT 1, tag $str, name $str NOT NULL, depart $str, return_time $str, extra $str, price $str, featured TINYINT NOT NULL DEFAULT 0, image $str NOT NULL DEFAULT '', subtitle $str NOT NULL DEFAULT '', price_round $str NOT NULL DEFAULT '', seats $str NOT NULL DEFAULT '', features TEXT, ship_name $str NOT NULL DEFAULT '')$tail";
     $sql[] = "CREATE TABLE IF NOT EXISTS packages (id $id, sort_order INT NOT NULL DEFAULT 0, active TINYINT NOT NULL DEFAULT 1, icon $str, name $str NOT NULL, summary $str, features TEXT, badge $str, hot TINYINT NOT NULL DEFAULT 0)$tail";
     $sql[] = "CREATE TABLE IF NOT EXISTS hotels (id $id, sort_order INT NOT NULL DEFAULT 0, active TINYINT NOT NULL DEFAULT 1, image $str NOT NULL DEFAULT '', name $str NOT NULL, location $str NOT NULL DEFAULT '', stars INT NOT NULL DEFAULT 3, rating $str NOT NULL DEFAULT '', price $str NOT NULL DEFAULT '', summary TEXT, amenities TEXT, badge $str NOT NULL DEFAULT '', featured TINYINT NOT NULL DEFAULT 0, owner_id INT NULL, status VARCHAR(16) NOT NULL DEFAULT 'approved', reject_reason $str NOT NULL DEFAULT '', pending_data TEXT)$tail";
     $sql[] = "CREATE TABLE IF NOT EXISTS owners (id $id, name $str NOT NULL, email $str NOT NULL UNIQUE, phone VARCHAR(32) NOT NULL, password_hash $str NOT NULL, status VARCHAR(16) NOT NULL DEFAULT 'pending', created_at $now)$tail";
@@ -35,7 +35,7 @@ function migrate_schema(PDO $pdo, string $driver): void
     $add = ['ships' => [
         'image' => "VARCHAR(255) NOT NULL DEFAULT ''", 'subtitle' => "VARCHAR(255) NOT NULL DEFAULT ''",
         'price_round' => "VARCHAR(255) NOT NULL DEFAULT ''", 'seats' => "VARCHAR(255) NOT NULL DEFAULT ''",
-        'features' => 'TEXT',
+        'features' => 'TEXT', 'ship_name' => "VARCHAR(255) NOT NULL DEFAULT ''",
     ], 'hotels' => [
         'owner_id' => 'INT NULL', 'status' => "VARCHAR(16) NOT NULL DEFAULT 'approved'",
         'reject_reason' => "VARCHAR(255) NOT NULL DEFAULT ''", 'pending_data' => 'TEXT',
@@ -63,7 +63,8 @@ function crud_defs(): array
             'fields' => [
                 'image' => ['সীপ/কেবিনের ছবি (PNG/JPG/WebP, ২MB পর্যন্ত)', 'image'],
                 'tag' => ['টাইপ ট্যাগ (যেমন VIP)', 'text'],
-                'name' => ['সীপ/ক্লাসের নাম (যেমন: Lavender (01 Person))', 'text', true],
+                'ship_name' => ['সীপের নাম (যেমন: MV Karnafuly Express) — ক্লাসের নামের উপরে বড় করে দেখাবে', 'text'],
+                'name' => ['ক্লাসের নাম (যেমন: Lavender (01 Person))', 'text', true],
                 'subtitle' => ['সাব-টাইটেল (যেমন: 1st Floor VIP Seats)', 'text'],
                 'price_round' => ['রাউন্ড ট্রিপ ভাড়া (যেমন ৩,৫০০)', 'text'],
                 'price' => ['সিঙ্গেল ট্রিপ ভাড়া (যেমন ১,৮০০)', 'text'],
