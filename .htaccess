@@ -1,5 +1,7 @@
 DirectoryIndex index.php
 Options -Indexes
+# URLs like /hotels.php/admin/ must 404 (otherwise relative CSS/JS links load the PHP page instead)
+AcceptPathInfo Off
 <FilesMatch "^(config\.php|config\.sample\.php|.*\.sqlite|readme\.md|error_log|.*\.log)$">
   Require all denied
 </FilesMatch>
